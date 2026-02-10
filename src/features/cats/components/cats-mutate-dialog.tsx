@@ -260,26 +260,20 @@ export function CatsMutateDialog({
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name='visible'
-                render={() => (
-                  <FormItem className='flex flex-col justify-end'>
-                    <FormLabel className='mb-3'>是否可见</FormLabel>
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div className='flex items-center space-x-2'>
-              <Switch
-                checked={form.watch('visible')}
-                onCheckedChange={(checked) =>
-                  form.setValue('visible', checked)
-                }
-              />
-              <label className='text-sm text-muted-foreground'>
-                在猫咖中显示此猫咪
-              </label>
+              <div className='space-y-3'>
+                <FormLabel>是否可见</FormLabel>
+                <div className='flex items-center space-x-2'>
+                  <Switch
+                    checked={form.watch('visible')}
+                    onCheckedChange={(checked) =>
+                      form.setValue('visible', checked)
+                    }
+                  />
+                  <label className='text-sm text-muted-foreground'>
+                    在猫咖中显示
+                  </label>
+                </div>
+              </div>
             </div>
           </form>
         </Form>
