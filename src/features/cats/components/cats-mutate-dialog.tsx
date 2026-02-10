@@ -189,7 +189,7 @@ export function CatsMutateDialog({
             </TabsList>
 
             <TabsContent value="ai">
-              <CatsAIFillTab onAIFill={handleAIFill} onCancel={() => setActiveTab('manual')} />
+              <CatsAIFillTab onAIFill={handleAIFill} />
             </TabsContent>
 
             <TabsContent value="manual">
