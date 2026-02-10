@@ -81,6 +81,8 @@ function generateCat(id: number): Cat {
       'resting',
       'sick',
       'retired',
+      'pregnant',
+      'nursing',
     ]),
     visible: faker.datatype.boolean(0.9), // 90% 可见
     created_at: faker.date.past().toISOString(),

@@ -5,6 +5,8 @@ export const catCafeStatusSchema = z.union([
   z.literal('resting'),
   z.literal('sick'),
   z.literal('retired'),
+  z.literal('pregnant'),
+  z.literal('nursing'),
 ])
 
 export type CatCafeStatus = z.infer<typeof catCafeStatusSchema>

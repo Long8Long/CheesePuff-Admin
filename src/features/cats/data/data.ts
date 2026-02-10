@@ -25,6 +25,8 @@ export const catCafeStatuses = [
   { label: '休息中', value: 'resting' },
   { label: '生病中', value: 'sick' },
   { label: '已退休', value: 'retired' },
+  { label: '怀孕中', value: 'pregnant' },
+  { label: '哺乳期', value: 'nursing' },
 ]
 
 // 状态颜色映射
@@ -36,6 +38,8 @@ export const statusColors = new Map<CatCafeStatus, string>([
   ['resting', 'bg-amber-100/30 text-amber-900 dark:text-amber-200 border-amber-200'],
   ['sick', 'bg-destructive/10 dark:bg-destructive/50 text-destructive dark:text-primary border-destructive/10'],
   ['retired', 'bg-neutral-300/40 border-neutral-300'],
+  ['pregnant', 'bg-pink-100/30 text-pink-900 dark:text-pink-200 border-pink-200'],
+  ['nursing', 'bg-purple-100/30 text-purple-900 dark:text-purple-200 border-purple-200'],
 ])
 
 // 根据 breed 获取英文品种名

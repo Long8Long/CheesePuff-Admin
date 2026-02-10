@@ -155,6 +155,8 @@ export const catsColumns: ColumnDef<Cat>[] = [
         resting: '休息中',
         sick: '生病中',
         retired: '已退休',
+        pregnant: '怀孕中',
+        nursing: '哺乳期',
       }[status]
       const colorClass = statusColors.get(status)
 
