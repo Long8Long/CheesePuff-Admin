@@ -215,14 +215,17 @@ export function CatsMutateDialog({
           />
         )}
 
-        <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            取消
-          </Button>
-          <Button form="cats-form" type="submit">
-            {isUpdate ? '保存' : '添加'}
-          </Button>
-        </DialogFooter>
+        {/* Dialog Footer - 只在编辑模式或手动填写 Tab 时显示 */}
+        {(isUpdate || activeTab === 'manual') && (
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              取消
+            </Button>
+            <Button form="cats-form" type="submit">
+              {isUpdate ? '保存' : '添加'}
+            </Button>
+          </DialogFooter>
+        )}
       </DialogContent>
     </Dialog>
   )
