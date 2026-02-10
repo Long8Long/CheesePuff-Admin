@@ -1,0 +1,37 @@
+{
+  "dataTable": {
+    "pagination": {
+      "rowsPerPage": "Rows per page",
+      "pageOf": "Page {{current}} of {{total}}",
+      "goToFirstPage": "Go to first page",
+      "goToPreviousPage": "Go to previous page",
+      "goToPage": "Go to page {{page}}",
+      "goToNextPage": "Go to next page",
+      "goToLastPage": "Go to last page"
+    },
+    "columnHeader": {
+      "sortAscending": "Sort ascending",
+      "sortDescending": "Sort descending",
+      "hideColumn": "Hide column"
+    },
+    "filter": {
+      "selected": "selected",
+      "selectAll": "Select all",
+      "clearAll": "Clear all",
+      "title": "Filter"
+    },
+    "bulkActions": {
+      "selected": "{{count}} {{entity}} selected",
+      "clearSelection": "Clear selection",
+      "clearSelectionShortcut": "Clear selection (Escape)",
+      "bulkActionsAvailable": "{{count}} {{entity}} selected. Bulk actions toolbar is available."
+    },
+    "viewOptions": {
+      "toggleColumns": "Toggle columns",
+      "view": "View"
+    },
+    "toolbar": {
+      "searchPlaceholder": "Search..."
+    }
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "dataTable": {
+    "pagination": {
+      "rowsPerPage": "每页行数",
+      "pageOf": "第 {{current}} 页 / 共 {{total}} 页",
+      "goToFirstPage": "跳转到第一页",
+      "goToPreviousPage": "上一页",
+      "goToPage": "跳转到第 {{page}} 页",
+      "goToNextPage": "下一页",
+      "goToLastPage": "跳转到最后一页"
+    },
+    "columnHeader": {
+      "sortAscending": "升序",
+      "sortDescending": "降序",
+      "hideColumn": "隐藏列"
+    },
+    "filter": {
+      "selected": "已选",
+      "selectAll": "全选",
+      "clearAll": "清除全部",
+      "title": "筛选"
+    },
+    "bulkActions": {
+      "selected": "已选择 {{count}} 个{{entity}}",
+      "clearSelection": "清除选择",
+      "clearSelectionShortcut": "清除选择 (Escape)",
+      "bulkActionsAvailable": "已选择 {{count}} {{entity}}。批量操作工具栏可用。"
+    },
+    "viewOptions": {
+      "toggleColumns": "切换列显示",
+      "view": "视图"
+    },
+    "toolbar": {
+      "searchPlaceholder": "搜索..."
+    }
+  }
+}
