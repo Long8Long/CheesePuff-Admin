@@ -41,6 +41,9 @@ function formatPrice(price: number): string {
 export const catsColumns: ColumnDef<Cat>[] = [
   {
     id: 'select',
+    meta: {
+      i18nKey: 'dataTable.cats.columns.select',
+    },
     header: ({ table }) => (
       <Checkbox
         checked={
@@ -65,6 +68,9 @@ export const catsColumns: ColumnDef<Cat>[] = [
   },
   {
     accessorKey: 'thumbnail',
+    meta: {
+      i18nKey: 'dataTable.cats.columns.thumbnail',
+    },
     header: '照片',
     cell: ({ row }) => {
       const thumbnail = row.getValue('thumbnail') as string
@@ -89,18 +95,20 @@ export const catsColumns: ColumnDef<Cat>[] = [
   },
   {
     accessorKey: 'name',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='名称' />
-    ),
+    meta: {
+      i18nKey: 'dataTable.cats.columns.name',
+    },
+    header: '名称',
     cell: ({ row }) => (
       <span className='font-medium'>{row.getValue('name')}</span>
     ),
   },
   {
     accessorKey: 'breed',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='品种' />
-    ),
+    meta: {
+      i18nKey: 'dataTable.cats.columns.breed',
+    },
+    header: '品种',
     cell: ({ row }) => {
       const breed = row.getValue('breed') as string
       const breedEn = row.original.breedEn
@@ -119,9 +127,10 @@ export const catsColumns: ColumnDef<Cat>[] = [
   },
   {
     accessorKey: 'birthday',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='年龄' />
-    ),
+    meta: {
+      i18nKey: 'dataTable.cats.columns.birthday',
+    },
+    header: '年龄',
     cell: ({ row }) => {
       const birthday = row.getValue('birthday') as string
       const age = calculateAge(birthday)
@@ -135,9 +144,10 @@ export const catsColumns: ColumnDef<Cat>[] = [
   },
   {
     accessorKey: 'price',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='价格' />
-    ),
+    meta: {
+      i18nKey: 'dataTable.cats.columns.price',
+    },
+    header: '价格',
     cell: ({ row }) => {
       const price = row.getValue('price') as number
       return <span className='font-medium'>{formatPrice(price)}</span>
@@ -145,9 +155,10 @@ export const catsColumns: ColumnDef<Cat>[] = [
   },
   {
     accessorKey: 'catcafeStatus',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='状态' />
-    ),
+    meta: {
+      i18nKey: 'dataTable.cats.columns.catcafeStatus',
+    },
+    header: '状态',
     cell: ({ row }) => {
       const status = row.getValue('catcafeStatus') as Cat['catcafeStatus']
       const statusLabel = {
@@ -172,9 +183,10 @@ export const catsColumns: ColumnDef<Cat>[] = [
   },
   {
     accessorKey: 'visible',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='可见' />
-    ),
+    meta: {
+      i18nKey: 'dataTable.cats.columns.visible',
+    },
+    header: '可见',
     cell: ({ row }) => {
       const visible = row.getValue('visible') as boolean
       return (
@@ -190,6 +202,9 @@ export const catsColumns: ColumnDef<Cat>[] = [
   },
   {
     id: 'actions',
+    meta: {
+      i18nKey: 'dataTable.cats.columns.actions',
+    },
     cell: ({ row }) => <DataTableRowActions row={row} />,
   },
 ]

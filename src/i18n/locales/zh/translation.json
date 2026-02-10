@@ -32,6 +32,19 @@
     },
     "toolbar": {
       "searchPlaceholder": "搜索..."
+    },
+    "cats": {
+      "columns": {
+        "select": "选择",
+        "thumbnail": "照片",
+        "name": "名称",
+        "breed": "品种",
+        "birthday": "年龄",
+        "price": "价格",
+        "catcafeStatus": "状态",
+        "visible": "可见",
+        "actions": "操作"
+      }
     }
   }
 }

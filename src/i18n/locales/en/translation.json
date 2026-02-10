@@ -32,6 +32,19 @@
     },
     "toolbar": {
       "searchPlaceholder": "Search..."
+    },
+    "cats": {
+      "columns": {
+        "select": "Select",
+        "thumbnail": "Photo",
+        "name": "Name",
+        "breed": "Breed",
+        "birthday": "Age",
+        "price": "Price",
+        "catcafeStatus": "Status",
+        "visible": "Visible",
+        "actions": "Actions"
+      }
     }
   }
 }
