@@ -15,7 +15,6 @@ export const catSchema = z.object({
   id: z.string(),
   name: z.string().min(1, '名称不能为空'),
   breed: z.string().min(1, '品种不能为空'),
-  breedEn: z.string().optional(),
   birthday: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, '日期格式错误，应为 YYYY-MM-DD'),
   price: z.number().positive('价格必须大于0'),
   images: z.array(z.string()).min(1, '至少需要一张图片'),

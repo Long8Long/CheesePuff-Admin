@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
 import type { Cat } from './schema'
-import { breeds, getBreedEn } from './data'
+import { breeds } from './data'
 
 faker.seed(12345)
 
@@ -70,7 +70,6 @@ function generateCat(id: number): Cat {
     id: idStr,
     name: faker.helpers.arrayElement(catNames),
     breed,
-    breedEn: getBreedEn(breed),
     birthday,
     price,
     images,

@@ -27,7 +27,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { SelectDropdown } from '@/components/select-dropdown'
-import { breeds, catCafeStatuses, getBreedEn } from '../data/data'
+import { breeds, catCafeStatuses } from '../data/data'
 import type { Cat } from '../data/schema'
 import type { CatAIOutput } from '../data/ai-schema'
 import { CatsAIFillTab } from './cats-ai-fill-tab'
@@ -41,7 +41,6 @@ type CatMutateDialogProps = {
 const formSchema = z.object({
   name: z.string().min(1, '名称不能为空'),
   breed: z.string().min(1, '请选择品种'),
-  breedEn: z.string().optional(),
   birthday: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, '日期格式错误'),
   price: z.string().min(1, '请输入价格'),
   images: z.string().min(1, '请至少输入一张图片 URL'),
@@ -67,7 +66,6 @@ export function CatsMutateDialog({
       ? {
           name: currentRow.name,
           breed: currentRow.breed,
-          breedEn: currentRow.breedEn || '',
           birthday: currentRow.birthday,
           price: String(currentRow.price),
           images: currentRow.images.join('\n'),
@@ -78,7 +76,6 @@ export function CatsMutateDialog({
       : {
           name: '',
           breed: '',
-          breedEn: '',
           birthday: '',
           price: '',
           images: '',
@@ -95,7 +92,6 @@ export function CatsMutateDialog({
     const formData: Omit<Cat, 'id' | 'created_at' | 'updated_at'> = {
       name: data.name,
       breed: data.breed,
-      breedEn: data.breedEn || getBreedEn(data.breed),
       birthday: data.birthday,
       price: Number.parseFloat(data.price),
       images,
@@ -122,10 +118,6 @@ export function CatsMutateDialog({
     if (data.breed) {
       form.setValue('breed', data.breed)
       newAiFilledFields.add('breed')
-    }
-    if (data.breedEn) {
-      form.setValue('breedEn', data.breedEn)
-      newAiFilledFields.add('breedEn')
     }
     if (data.birthday) {
       form.setValue('birthday', data.birthday)
@@ -299,24 +291,6 @@ function FormWrapper({
               )}
             />
           </div>
-
-          <FormField
-            control={form.control}
-            name="breedEn"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  英文名（可选）
-                  {aiFilledFields.has('breedEn') && <Badge />}
-                </FormLabel>
-                <FormControl>
-                  <Input {...field} placeholder="如：Ragdoll" />
-                </FormControl>
-                <FormDescription>留空将根据品种自动填充</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
 
           <div className="grid grid-cols-2 gap-4">
             <FormField

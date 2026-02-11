@@ -25,7 +25,6 @@ export const catAIOutputSchema = z.object({
       '新加坡猫',
     ])
     .optional(),
-  breedEn: z.string().optional(),
   birthday: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
   price: z.number().positive().optional(),
   description: z.string().optional(),

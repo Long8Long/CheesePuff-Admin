@@ -110,15 +110,7 @@ export const catsColumns: ColumnDef<Cat>[] = [
     header: '品种',
     cell: ({ row }) => {
       const breed = row.getValue('breed') as string
-      const breedEn = row.original.breedEn
-      return (
-        <div>
-          <div className='font-medium'>{breed}</div>
-          {breedEn && (
-            <div className='text-xs text-muted-foreground'>{breedEn}</div>
-          )}
-        </div>
-      )
+      return <span className='font-medium'>{breed}</span>
     },
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id))
