@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
 import { Sparkles } from 'lucide-react'
 import { showSubmittedData } from '@/lib/show-submitted-data'
+import { getTodayString } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -76,7 +77,7 @@ export function CatsMutateDialog({
       : {
           name: '',
           breed: '',
-          birthday: '',
+          birthday: getTodayString(),
           price: '',
           images: '',
           description: '',
