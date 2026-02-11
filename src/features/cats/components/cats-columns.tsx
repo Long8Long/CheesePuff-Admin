@@ -2,6 +2,7 @@ import { type ColumnDef } from '@tanstack/react-table'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Eye, EyeOff } from 'lucide-react'
+import { DataTableColumnHeader } from '@/components/data-table'
 import { statusColors } from '../data/data'
 import { type Cat } from '../data/schema'
 import { DataTableRowActions } from './data-table-row-actions'
@@ -70,7 +71,9 @@ export const catsColumns: ColumnDef<Cat>[] = [
     meta: {
       i18nKey: 'dataTable.cats.columns.thumbnail',
     },
-    header: '照片',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='照片' />
+    ),
     cell: ({ row }) => {
       const thumbnail = row.getValue('thumbnail') as string
       return (
@@ -97,7 +100,9 @@ export const catsColumns: ColumnDef<Cat>[] = [
     meta: {
       i18nKey: 'dataTable.cats.columns.name',
     },
-    header: '名称',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='名称' />
+    ),
     cell: ({ row }) => (
       <span className='font-medium'>{row.getValue('name')}</span>
     ),
@@ -107,7 +112,9 @@ export const catsColumns: ColumnDef<Cat>[] = [
     meta: {
       i18nKey: 'dataTable.cats.columns.breed',
     },
-    header: '品种',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='品种' />
+    ),
     cell: ({ row }) => {
       const breed = row.getValue('breed') as string
       return <span className='font-medium'>{breed}</span>
@@ -121,7 +128,9 @@ export const catsColumns: ColumnDef<Cat>[] = [
     meta: {
       i18nKey: 'dataTable.cats.columns.birthday',
     },
-    header: '年龄',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='年龄' />
+    ),
     cell: ({ row }) => {
       const birthday = row.getValue('birthday') as string
       const age = calculateAge(birthday)
@@ -138,7 +147,9 @@ export const catsColumns: ColumnDef<Cat>[] = [
     meta: {
       i18nKey: 'dataTable.cats.columns.price',
     },
-    header: '价格',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='价格' />
+    ),
     cell: ({ row }) => {
       const price = row.getValue('price') as number
       return <span className='font-medium'>{formatPrice(price)}</span>
@@ -149,7 +160,9 @@ export const catsColumns: ColumnDef<Cat>[] = [
     meta: {
       i18nKey: 'dataTable.cats.columns.catcafeStatus',
     },
-    header: '状态',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='状态' />
+    ),
     cell: ({ row }) => {
       const status = row.getValue('catcafeStatus') as Cat['catcafeStatus']
       const statusLabel = {
@@ -177,25 +190,32 @@ export const catsColumns: ColumnDef<Cat>[] = [
     meta: {
       i18nKey: 'dataTable.cats.columns.visible',
     },
-    header: '可见',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='可见性' />
+    ),
     cell: ({ row }) => {
       const visible = row.getValue('visible') as boolean
       return (
-        <div className='flex justify-center'>
+        <div className='flex'>
           {visible ? (
-            <Eye className='size-4 text-muted-foreground' />
+            <Eye className='size-4' />
           ) : (
-            <EyeOff className='size-4 text-muted-foreground' />
+            <EyeOff className='size-4' />
           )}
         </div>
       )
     },
+    enableSorting: false,
   },
   {
     id: 'actions',
     meta: {
       i18nKey: 'dataTable.cats.columns.actions',
     },
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='操作' />
+    ),
     cell: ({ row }) => <DataTableRowActions row={row} />,
+    enableSorting: false,
   },
 ]
