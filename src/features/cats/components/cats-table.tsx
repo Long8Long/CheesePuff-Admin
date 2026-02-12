@@ -41,6 +41,7 @@ export function CatsTable({ data }: DataTableProps) {
   const [rowSelection, setRowSelection] = useState({})
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+  const [isRefreshing, setIsRefreshing] = useState(false)
 
   // Synced with URL states
   const {
@@ -105,6 +106,14 @@ export function CatsTable({ data }: DataTableProps) {
     ensurePageInRange(pageCount)
   }, [pageCount, ensurePageInRange])
 
+  const handleRefresh = async () => {
+    setIsRefreshing(true)
+    // TODO: Replace with actual API call
+    // Simulate network delay for demo
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+    setIsRefreshing(false)
+  }
+
   return (
     <div
       className={cn(
@@ -115,6 +124,8 @@ export function CatsTable({ data }: DataTableProps) {
       <DataTableToolbar
         table={table}
         searchPlaceholder='搜索猫咪名称、品种...'
+        onRefresh={handleRefresh}
+        isRefreshing={isRefreshing}
         filters={[
           {
             columnId: 'breed',
@@ -160,7 +171,7 @@ export function CatsTable({ data }: DataTableProps) {
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  data-state={row.getIsSelected() && 'selected'}
+                  data-state={row.getIsSelected() && '已选择'}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
