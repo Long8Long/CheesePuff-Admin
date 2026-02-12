@@ -29,27 +29,50 @@ export async function parseCatInfoWithAI(
 ## 字段说明
 - name: 猫咪名字，如"小咪"、"团子"
 - breed: 必须从以下品种中选择：${breedList}
-- breedEn: 品种英文名（可选）
+- store: 店铺信息（山东店/苏州店）
+  - 提到"山东店"、"山东" → 山东店
+  - 提到"苏州店"、"苏州"、"苏州店" → 苏州店
+  - 未明确提到店铺时 → 默认山东店
+  - 注意：品种名称中的"苏州店"仅表示品种，不代表店铺
 - birthday: 转换为 YYYY-MM-DD 格式
   - "2岁" → 推算为当前日期-2年
   - "2023年8月" → 2023-08-01
   - "去年5月" → 去年-05-01
   - "8个月" → 当前日期-8个月
+  - "2025/6/8" → 2025-06-08
 - price: 提取数字价格
-- description: 猫咪的描述信息
+- description: 猫咪的详细描述（驱虫疫苗、性格特点、健康状况等所有描述性文字）
 - catcafeStatus: 根据关键词判断
-  - 工作中/在店/上班 → working
-  - 休息/休假 → resting
+  - 工作中/在店/上班/在售 → working
+  - 休息/休假/休息中 → resting
   - 生病/不舒服 → sick
   - 退休/不干了 → retired
   - 怀孕/怀着 → pregnant
   - 哺乳/带娃 → nursing
-- visible: 默认 true
+- visible: "在售"、"可接"表示可见，默认 true
+
+## 重要规则
+1. 店铺和品种是独立的：品种名称带"苏州店"不代表就是苏州店
+2. 除指定字段外，其他所有描述性文字都放入 description
+3. 无法提取的字段请设置为 null（JSON 中的 null，不要删除字段）
 
 ## 返回格式
 只返回 JSON 对象，不要有任何其他文字说明。
 
-无法提取的字段请设置为 null（JSON 中的 null，不要删除字段）。`
+## 示例
+输入："山东店。短毛金点弟弟（苏州店）2025/6/8 驱虫疫苗齐全 眼睛大，体格壮，会趴肩膀，喜欢贴人睡觉 在售 3000元 休息中 现猫随时可接。"
+
+输出：
+{
+  "name": null,
+  "breed": "短毛金点弟弟",
+  "store": "山东店",
+  "birthday": "2025-06-08",
+  "price": 3000,
+  "description": "驱虫疫苗齐全 眼睛大，体格壮，会趴肩膀，喜欢贴人睡觉 现猫随时可接",
+  "catcafeStatus": "resting",
+  "visible": true
+}`
 
   const userContent = `请从以下文本中提取猫咪信息：\n\n${input.text || ''}`
 
