@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useState } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Sparkles } from 'lucide-react'
 import { showSubmittedData } from '@/lib/show-submitted-data'
 import { getTodayString } from '@/lib/utils'
@@ -29,10 +29,11 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { SelectDropdown } from '@/components/select-dropdown'
-import { breeds, catCafeStatuses } from '../data/data'
+import { breeds as defaultBreeds, catCafeStatuses, stores } from '../data/data'
 import type { Cat } from '../data/schema'
 import type { CatAIOutput } from '../data/ai-schema'
 import { CatsAIFillTab } from './cats-ai-fill-tab'
+import { BreedDialog } from './breed-dialog'
 
 type CatMutateDialogProps = {
   open: boolean
@@ -43,6 +44,7 @@ type CatMutateDialogProps = {
 const formSchema = z.object({
   name: z.string().min(1, '名称不能为空'),
   breed: z.string().min(1, '请选择品种'),
+  store: z.string().min(1, '请选择店铺'),
   birthday: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, '日期格式错误'),
   price: z.string().min(1, '请输入价格'),
   image: z.string().min(1, '请上传一张图片'),
@@ -61,6 +63,19 @@ export function CatsMutateDialog({
   const isUpdate = !!currentRow
   const [activeTab, setActiveTab] = useState<'ai' | 'manual'>('manual')
   const [aiFilledFields, setAiFilledFields] = useState<Set<string>>(new Set())
+  const [customBreeds, setCustomBreeds] = useState<Array<{ label: string; value: string }>>([])
+
+  // 合并默认品种和自定义品种
+  const breeds = useMemo(() => {
+    return [...defaultBreeds, ...customBreeds]
+  }, [customBreeds])
+
+  const handleAddBreed = (name: string) => {
+    const newBreed = { label: name, value: name }
+    setCustomBreeds((prev) => [...prev, newBreed])
+    // 自动选中新添加的品种
+    form.setValue('breed', name)
+  }
 
   const form = useForm<CatForm>({
     resolver: zodResolver(formSchema),
@@ -68,6 +83,7 @@ export function CatsMutateDialog({
       ? {
           name: currentRow.name,
           breed: currentRow.breed,
+          store: currentRow.store,
           birthday: currentRow.birthday,
           price: String(currentRow.price),
           image: currentRow.images[0] || '',
@@ -78,6 +94,7 @@ export function CatsMutateDialog({
       : {
           name: '',
           breed: '',
+          store: '山东店',
           birthday: getTodayString(),
           price: '',
           image: '',
@@ -94,6 +111,7 @@ export function CatsMutateDialog({
     const formData: Omit<Cat, 'id' | 'created_at' | 'updated_at'> = {
       name: data.name,
       breed: data.breed,
+      store: data.store as Cat['store'],
       birthday: data.birthday,
       price: Number.parseFloat(data.price),
       images,
@@ -120,6 +138,10 @@ export function CatsMutateDialog({
     if (data.breed) {
       form.setValue('breed', data.breed)
       newAiFilledFields.add('breed')
+    }
+    if (data.store) {
+      form.setValue('store', data.store)
+      newAiFilledFields.add('store')
     }
     if (data.birthday) {
       form.setValue('birthday', data.birthday)
@@ -151,15 +173,19 @@ export function CatsMutateDialog({
     form.reset()
   }
 
+  // 监听对话框关闭，重置状态
+  useEffect(() => {
+    if (!open) {
+      form.reset()
+      setAiFilledFields(new Set())
+      setActiveTab('manual')
+    }
+  }, [open, form])
+
   return (
     <Dialog
       open={open}
-      onOpenChange={(v) => {
-        onOpenChange(v)
-        form.reset()
-        setAiFilledFields(new Set())
-        setActiveTab('manual')
-      }}
+      onOpenChange={onOpenChange}
     >
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
@@ -193,6 +219,8 @@ export function CatsMutateDialog({
                 showAIBadge={aiFilledFields.size > 0}
                 onResetAI={handleResetAI}
                 onSubmit={onSubmit}
+                breeds={breeds}
+                onAddBreed={handleAddBreed}
               />
             </TabsContent>
           </Tabs>
@@ -206,6 +234,8 @@ export function CatsMutateDialog({
             showAIBadge={false}
             onResetAI={handleResetAI}
             onSubmit={onSubmit}
+            breeds={breeds}
+            onAddBreed={handleAddBreed}
           />
         )}
 
@@ -232,21 +262,27 @@ function FormWrapper({
   showAIBadge,
   onResetAI,
   onSubmit,
+  breeds,
+  onAddBreed,
 }: {
   form: ReturnType<typeof useForm<CatForm>>
   aiFilledFields: Set<string>
   showAIBadge: boolean
   onResetAI: () => void
   onSubmit: (data: CatForm) => void
+  breeds: Array<{ label: string; value: string }>
+  onAddBreed: (name: string) => void
 }) {
+  const [showBreedDialog, setShowBreedDialog] = useState(false)
+
   return (
     <>
       {/* AI 填充成功提示 */}
       {showAIBadge && (
-        <div className="flex items-center justify-between rounded-md bg-primary/10 p-3 text-sm text-primary">
+        <div className="mb-4 flex items-center justify-between rounded-md bg-primary/10 p-3 text-sm text-primary">
           <div className="flex items-center gap-2">
             <Sparkles className="h-4 w-4" />
-            <span>AI 已填充 {aiFilledFields.size} 个字段</span>
+            <span>AI已识别到{aiFilledFields.size}项内容</span>
           </div>
           <Button variant="ghost" size="sm" onClick={onResetAI} className="h-7 text-xs">
             重置
@@ -282,12 +318,18 @@ function FormWrapper({
                     品种
                     {aiFilledFields.has('breed') && <Badge />}
                   </FormLabel>
-                  <SelectDropdown
-                    defaultValue={field.value}
-                    onValueChange={field.onChange}
-                    placeholder="请选择品种"
-                    items={breeds}
-                  />
+                  <div className="flex gap-2">
+                    <SelectDropdown
+                      defaultValue={field.value}
+                      onValueChange={field.onChange}
+                      placeholder="请选择品种"
+                      items={breeds}
+                      allowAddNew
+                      onAddNew={() => setShowBreedDialog(true)}
+                      addNewLabel="添加新品种"
+                      className="flex-1"
+                    />
+                  </div>
                   <FormMessage />
                 </FormItem>
               )}
@@ -311,6 +353,25 @@ function FormWrapper({
                 </FormItem>
               )}
             />
+            <FormField
+              control={form.control}
+              name="store"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>店铺</FormLabel>
+                  <SelectDropdown
+                    defaultValue={field.value}
+                    onValueChange={field.onChange}
+                    placeholder="请选择店铺"
+                    items={stores}
+                  />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
             <FormField
               control={form.control}
               name="price"
@@ -401,6 +462,13 @@ function FormWrapper({
           />
         </form>
       </Form>
+
+      {/* 添加新品种对话框 */}
+      <BreedDialog
+        open={showBreedDialog}
+        onOpenChange={setShowBreedDialog}
+        onAdd={onAddBreed}
+      />
     </>
   )
 }
