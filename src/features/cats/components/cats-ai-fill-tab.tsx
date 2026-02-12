@@ -47,7 +47,7 @@ export function CatsAIFillTab({ onAIFill }: CatsAIFillTabProps) {
       {/* 说明文字 */}
       <div className="text-sm text-muted-foreground">
         <p>用一段话描述您的猫咪，AI 会自动提取信息并填充到表单中。</p>
-        <p className="mt-1">例如："我有一只叫"团子"的布偶猫，2岁了，性格很温顺，想卖2800元..."</p>
+        <p className="mt-1">例如："山东店。短毛金点弟弟 2025/6/8 驱虫疫苗齐全 眼睛大，体格壮，会趴肩膀，喜欢贴人睡觉 在售 3000元 休息中 现猫随时可接。"</p>
       </div>
 
       {/* 文本输入区 */}
