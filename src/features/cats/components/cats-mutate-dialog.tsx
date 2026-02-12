@@ -19,6 +19,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+import { ImageUpload } from '@/components/ui/image-upload'
 import {
   Dialog,
   DialogContent,
@@ -44,7 +45,7 @@ const formSchema = z.object({
   breed: z.string().min(1, '请选择品种'),
   birthday: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, '日期格式错误'),
   price: z.string().min(1, '请输入价格'),
-  images: z.string().min(1, '请至少输入一张图片 URL'),
+  image: z.string().min(1, '请上传一张图片'),
   description: z.string().min(1, '描述不能为空'),
   catcafeStatus: z.string().min(1, '请选择工作状态'),
   visible: z.boolean(),
@@ -69,7 +70,7 @@ export function CatsMutateDialog({
           breed: currentRow.breed,
           birthday: currentRow.birthday,
           price: String(currentRow.price),
-          images: currentRow.images.join('\n'),
+          image: currentRow.images[0] || '',
           description: currentRow.description,
           catcafeStatus: currentRow.catcafeStatus,
           visible: currentRow.visible,
@@ -79,7 +80,7 @@ export function CatsMutateDialog({
           breed: '',
           birthday: getTodayString(),
           price: '',
-          images: '',
+          image: '',
           description: '',
           catcafeStatus: 'working',
           visible: true,
@@ -87,8 +88,8 @@ export function CatsMutateDialog({
   })
 
   const onSubmit = (data: CatForm) => {
-    // 将图片字符串转换为数组
-    const images = data.images.split('\n').filter((url) => url.trim() !== '')
+    // 将单个图片 URL 转换为数组（保持与现有数据结构兼容）
+    const images = [data.image]
 
     const formData: Omit<Cat, 'id' | 'created_at' | 'updated_at'> = {
       name: data.name,
@@ -96,7 +97,7 @@ export function CatsMutateDialog({
       birthday: data.birthday,
       price: Number.parseFloat(data.price),
       images,
-      thumbnail: images[0],
+      thumbnail: data.image,
       description: data.description,
       catcafeStatus: data.catcafeStatus as Cat['catcafeStatus'],
       visible: data.visible,
@@ -330,25 +331,6 @@ function FormWrapper({
 
           <FormField
             control={form.control}
-            name="images"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>图片 URL</FormLabel>
-                <FormControl>
-                  <Textarea
-                    {...field}
-                    placeholder="每行一个图片 URL&#10;https://example.com/cat1.jpg&#10;https://example.com/cat2.jpg"
-                    rows={3}
-                  />
-                </FormControl>
-                <FormDescription>每行输入一个图片 URL，至少需要一张</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
             name="description"
             render={({ field }) => (
               <FormItem>
@@ -399,6 +381,24 @@ function FormWrapper({
               </div>
             </div>
           </div>
+
+          <FormField
+            control={form.control}
+            name="image"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>图片</FormLabel>
+                <FormControl>
+                  <ImageUpload
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
+                </FormControl>
+                <FormDescription>请上传一张猫咪图片</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </form>
       </Form>
     </>
