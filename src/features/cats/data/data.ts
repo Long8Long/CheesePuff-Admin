@@ -2,21 +2,34 @@ import { type CatCafeStatus } from './schema'
 
 // 品种列表
 export const breeds = [
-  { label: '布偶猫', value: '布偶猫' },
-  { label: '英短', value: '英短' },
-  { label: '美短', value: '美短' },
-  { label: '暹罗猫', value: '暹罗猫' },
-  { label: '波斯猫', value: '波斯猫' },
-  { label: '缅因猫', value: '缅因猫' },
-  { label: '斯芬克斯', value: '斯芬克斯' },
-  { label: '金渐层', value: '金渐层' },
-  { label: '银渐层', value: '银渐层' },
-  { label: '加菲猫', value: '加菲猫' },
-  { label: '折耳猫', value: '折耳猫' },
-  { label: '孟加拉豹猫', value: '孟加拉豹猫' },
-  { label: '挪威森林猫', value: '挪威森林猫' },
-  { label: '俄罗斯蓝猫', value: '俄罗斯蓝猫' },
-  { label: '新加坡猫', value: '新加坡猫' },
+  { label: '豹猫妹妹', value: '豹猫妹妹' },
+  { label: '纯白德文妹妹', value: '纯白德文妹妹' },
+  { label: '短毛11色金渐层妹妹', value: '短毛11色金渐层妹妹' },
+  { label: '短毛12色金渐层弟弟', value: '短毛12色金渐层弟弟' },
+  { label: '短毛12色金渐层妹妹', value: '短毛12色金渐层妹妹' },
+  { label: '短毛金点弟弟', value: '短毛金点弟弟' },
+  { label: '短毛金点妹妹', value: '短毛金点妹妹' },
+  { label: '短毛金加白弟弟', value: '短毛金加白弟弟' },
+  { label: '短毛蓝金加白弟弟', value: '短毛蓝金加白弟弟' },
+  { label: '短毛蓝金渐层弟弟', value: '短毛蓝金渐层弟弟' },
+  { label: '短毛紫金弟弟', value: '短毛紫金弟弟' },
+  { label: '短毛紫金渐层妹妹', value: '短毛紫金渐层妹妹' },
+  { label: '短毛紫金妹妹', value: '短毛紫金妹妹' },
+  { label: '海山双布偶妹妹', value: '海山双布偶妹妹' },
+  { label: '黑白德文卷毛猫妹妹', value: '黑白德文卷毛猫妹妹' },
+  { label: '虎斑加白德文妹妹', value: '虎斑加白德文妹妹' },
+  { label: '蓝双布偶妹妹', value: '蓝双布偶妹妹' },
+  { label: '蓝重点加白曼基康妹妹', value: '蓝重点加白曼基康妹妹' },
+  { label: '长毛金渐层弟弟', value: '长毛金渐层弟弟' },
+  { label: '长毛紫金弟弟', value: '长毛紫金弟弟' },
+  { label: '长毛紫金渐层妹妹', value: '长毛紫金渐层妹妹' },
+  { label: '棕虎斑缅因弟弟', value: '棕虎斑缅因弟弟' },
+]
+
+// 店铺列表
+export const stores = [
+  { label: '山东店', value: '山东店' },
+  { label: '苏州店', value: '苏州店' },
 ]
 
 // 工作状态列表
