@@ -1,6 +1,7 @@
-import { Loader } from 'lucide-react'
+import { Loader, Plus } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { FormControl } from '@/components/ui/form'
+import { Button } from '@/components/ui/button'
 import {
   Select,
   SelectContent,
@@ -18,6 +19,9 @@ type SelectDropdownProps = {
   disabled?: boolean
   className?: string
   isControlled?: boolean
+  allowAddNew?: boolean
+  onAddNew?: () => void
+  addNewLabel?: string
 }
 
 export function SelectDropdown({
@@ -29,6 +33,9 @@ export function SelectDropdown({
   disabled,
   className = '',
   isControlled = false,
+  allowAddNew = false,
+  onAddNew,
+  addNewLabel = '添加新选项',
 }: SelectDropdownProps) {
   const defaultState = isControlled
     ? { value: defaultValue, onValueChange }
@@ -50,11 +57,26 @@ export function SelectDropdown({
             </div>
           </SelectItem>
         ) : (
-          items?.map(({ label, value }) => (
-            <SelectItem key={value} value={value}>
-              {label}
-            </SelectItem>
-          ))
+          <>
+            {allowAddNew && onAddNew && (
+              <Button
+                variant='ghost'
+                className='w-full justify-start px-2 h-9 text-sm text-muted-foreground hover:text-foreground'
+                onClick={(e) => {
+                  e.preventDefault()
+                  onAddNew()
+                }}
+              >
+                <Plus className='mr-2 h-4 w-4' />
+                {addNewLabel}
+              </Button>
+            )}
+            {items?.map(({ label, value }) => (
+              <SelectItem key={value} value={value}>
+                {label}
+              </SelectItem>
+            ))}
+          </>
         )}
       </SelectContent>
     </Select>
