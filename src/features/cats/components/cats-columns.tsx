@@ -124,6 +124,22 @@ export const catsColumns: ColumnDef<Cat>[] = [
     },
   },
   {
+    accessorKey: 'store',
+    meta: {
+      i18nKey: 'dataTable.cats.columns.store',
+    },
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='店铺' />
+    ),
+    cell: ({ row }) => {
+      const store = row.getValue('store') as string
+      return <span className='font-medium'>{store}</span>
+    },
+    filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id))
+    },
+  },
+  {
     accessorKey: 'birthday',
     meta: {
       i18nKey: 'dataTable.cats.columns.birthday',
