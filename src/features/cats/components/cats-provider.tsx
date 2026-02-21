@@ -2,7 +2,7 @@
 
 import React from 'react'
 import useDialogState from '@/hooks/use-dialog-state'
-import type { Cat } from '../data/schema'
+import type { Cat } from '../models'
 
 type CatsDialogType = 'create' | 'edit' | 'delete'
 

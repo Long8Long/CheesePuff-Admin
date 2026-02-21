@@ -30,7 +30,7 @@ import {
 } from '@/components/ui/dialog'
 import { SelectDropdown } from '@/components/select-dropdown'
 import { breeds as defaultBreeds, catCafeStatuses, stores } from '../data/data'
-import type { Cat } from '../data/schema'
+import type { Cat } from '../models'
 import type { CatAIOutput } from '../data/ai-schema'
 import { CatsAIFillTab } from './cats-ai-fill-tab'
 import { BreedDialog } from './breed-dialog'
@@ -81,13 +81,13 @@ export function CatsMutateDialog({
     resolver: zodResolver(formSchema),
     defaultValues: currentRow
       ? {
-          name: currentRow.name,
+          name: currentRow.name ?? '',
           breed: currentRow.breed,
           store: currentRow.store,
           birthday: currentRow.birthday,
-          price: String(currentRow.price),
-          image: currentRow.images[0] || '',
-          description: currentRow.description,
+          price: String(currentRow.price ?? ''),
+          image: currentRow.images?.[0] ?? '',
+          description: currentRow.description ?? '',
           catcafeStatus: currentRow.catcafeStatus,
           visible: currentRow.visible,
         }
@@ -108,7 +108,7 @@ export function CatsMutateDialog({
     // 将单个图片 URL 转换为数组（保持与现有数据结构兼容）
     const images = [data.image]
 
-    const formData: Omit<Cat, 'id' | 'created_at' | 'updated_at'> = {
+    const formData: Omit<Cat, 'id' | 'createdAt' | 'updatedAt'> = {
       name: data.name,
       breed: data.breed,
       store: data.store as Cat['store'],

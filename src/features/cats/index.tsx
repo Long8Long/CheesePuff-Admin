@@ -9,7 +9,6 @@ import { CatsDialogs } from './components/cats-dialogs'
 import { CatsPrimaryButtons } from './components/cats-primary-buttons'
 import { CatsProvider } from './components/cats-provider'
 import { CatsTable } from './components/cats-table'
-import { cats } from './data/cats'
 
 export function Cats() {
   return (
@@ -34,7 +33,7 @@ export function Cats() {
           </div>
           <CatsPrimaryButtons />
         </div>
-        <CatsTable data={cats} />
+        <CatsTable />
       </Main>
 
       <CatsDialogs />

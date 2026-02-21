@@ -1,39 +1,46 @@
 import { z } from 'zod'
+import type { Cat, CatCafeStatus, Store } from '../models'
 
-export const catCafeStatusSchema = z.union([
-  z.literal('working'),
-  z.literal('resting'),
-  z.literal('sick'),
-  z.literal('retired'),
-  z.literal('pregnant'),
-  z.literal('nursing'),
+// Define the enum separately for reuse / 单独定义枚举以便复用
+const catCafeStatusEnum = z.enum([
+  'working',
+  'resting',
+  'sick',
+  'retired',
+  'pregnant',
+  'nursing',
+  'training',
 ])
+const storeEnum = z.enum(['山东店', '苏州店'])
 
-export type CatCafeStatus = z.infer<typeof catCafeStatusSchema>
-
-export const storeSchema = z.union([
-  z.literal('山东店'),
-  z.literal('苏州店'),
-])
-
-export type Store = z.infer<typeof storeSchema>
-
-export const catSchema = z.object({
+/**
+ * Zod schema for Cat validation
+ * Cat 验证的 Zod schema
+ *
+ * Note: The Cat type is defined in ../models/cat.types.ts
+ * 类型定义在 ../models/cat.types.ts
+ */
+export const catSchema: z.ZodType<Cat> = z.object({
   id: z.string(),
-  name: z.string().min(1, '名称不能为空'),
+  name: z.string().nullable().optional(),
   breed: z.string().min(1, '品种不能为空'),
-  store: storeSchema,
-  birthday: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, '日期格式错误，应为 YYYY-MM-DD'),
-  price: z.number().positive('价格必须大于0'),
-  images: z.array(z.string()).min(1, '至少需要一张图片'),
-  thumbnail: z.string().optional(),
-  description: z.string().min(1, '描述不能为空'),
-  catcafeStatus: catCafeStatusSchema,
+  store: storeEnum.nullable().optional(),
+  birthday: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, '日期格式错误，应为 YYYY-MM-DD')
+    .nullable()
+    .optional(),
+  price: z.number().positive('价格必须大于0').nullable().optional(),
+  images: z.array(z.string()).nullable().optional(),
+  thumbnail: z.string().nullable().optional(),
+  description: z.string().nullable().optional(),
+  catcafeStatus: catCafeStatusEnum.nullish(),
   visible: z.boolean().default(true),
-  created_at: z.string().optional(),
-  updated_at: z.string().optional(),
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional(),
 })
 
-export type Cat = z.infer<typeof catSchema>
-
 export const catListSchema = z.array(catSchema)
+
+// Re-export types for convenience / 为方便起见重新导出类型
+export type { Cat, CatCafeStatus, Store }

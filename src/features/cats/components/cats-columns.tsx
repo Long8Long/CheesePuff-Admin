@@ -4,7 +4,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Eye, EyeOff } from 'lucide-react'
 import { DataTableColumnHeader } from '@/components/data-table'
 import { statusColors } from '../data/data'
-import { type Cat } from '../data/schema'
+import type { Cat } from '../models'
 import { DataTableRowActions } from './data-table-row-actions'
 
 // 计算年龄

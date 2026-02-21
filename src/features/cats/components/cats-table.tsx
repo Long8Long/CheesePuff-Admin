@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/incompatible-library */
 
 import { useEffect, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { getRouteApi } from '@tanstack/react-router'
 import {
   type SortingState,
@@ -16,6 +17,7 @@ import {
 } from '@tanstack/react-table'
 import { cn } from '@/lib/utils'
 import { useTableUrlState } from '@/hooks/use-table-url-state'
+import { catsService } from '@/features/cats/services/cats.service'
 import {
   Table,
   TableBody,
@@ -25,23 +27,16 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { DataTablePagination, DataTableToolbar } from '@/components/data-table'
-import { breeds, catCafeStatuses } from '../data/data'
-import { type Cat } from '../data/schema'
 import { DataTableBulkActions } from './data-table-bulk-actions'
 import { catsColumns as columns } from './cats-columns'
 
 const route = getRouteApi('/_authenticated/cats')
 
-type DataTableProps = {
-  data: Cat[]
-}
-
-export function CatsTable({ data }: DataTableProps) {
+export function CatsTable() {
   // Local UI-only states
   const [rowSelection, setRowSelection] = useState({})
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
-  const [isRefreshing, setIsRefreshing] = useState(false)
 
   // Synced with URL states
   const {
@@ -63,6 +58,28 @@ export function CatsTable({ data }: DataTableProps) {
     ],
   })
 
+  // Fetch cats list from API
+  const {
+    data: response,
+    isLoading,
+    error,
+    refetch,
+    isFetching,
+  } = useQuery({
+    queryKey: ['cats', pagination.pageIndex + 1, pagination.pageSize, columnFilters, globalFilter],
+    queryFn: () =>
+      catsService.getList({
+        page: pagination.pageIndex + 1,
+        pageSize: pagination.pageSize,
+        breed: columnFilters.find((f) => f.id === 'breed')?.value as string,
+        catcafeStatus: columnFilters.find((f) => f.id === 'catcafeStatus')?.value as string,
+        includeHidden: true,
+      }),
+  })
+
+  const data = response?.cats ?? []
+  const totalCount = response?.pagination?.total ?? 0
+
   const table = useReactTable({
     data,
     columns,
@@ -74,13 +91,14 @@ export function CatsTable({ data }: DataTableProps) {
       globalFilter,
       pagination,
     },
+    pageCount: Math.ceil(totalCount / pagination.pageSize),
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
     onColumnVisibilityChange: setColumnVisibility,
     globalFilterFn: (row, _columnId, filterValue) => {
       const id = String(row.getValue('id')).toLowerCase()
-      const name = String(row.getValue('name')).toLowerCase()
+      const name = String(row.getValue('name') ?? '').toLowerCase()
       const breed = String(row.getValue('breed')).toLowerCase()
       const searchValue = String(filterValue).toLowerCase()
 
@@ -107,11 +125,25 @@ export function CatsTable({ data }: DataTableProps) {
   }, [pageCount, ensurePageInRange])
 
   const handleRefresh = async () => {
-    setIsRefreshing(true)
-    // TODO: Replace with actual API call
-    // Simulate network delay for demo
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    setIsRefreshing(false)
+    await refetch()
+  }
+
+  if (isLoading) {
+    return (
+      <div className='flex items-center justify-center h-64'>
+        <p className='text-muted-foreground'>加载中...</p>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className='flex items-center justify-center h-64'>
+        <p className='text-destructive'>
+          加载失败: {(error as Error).message}
+        </p>
+      </div>
+    )
   }
 
   return (
@@ -125,7 +157,7 @@ export function CatsTable({ data }: DataTableProps) {
         table={table}
         searchPlaceholder='搜索猫咪名称、品种...'
         onRefresh={handleRefresh}
-        isRefreshing={isRefreshing}
+        isRefreshing={isFetching}
         filters={[
           {
             columnId: 'breed',

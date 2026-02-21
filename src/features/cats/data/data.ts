@@ -1,6 +1,6 @@
-import { type CatCafeStatus } from './schema'
+import type { CatCafeStatus } from '../models'
 
-// 品种列表
+// 品种列表 / Breed list
 export const breeds = [
   { label: '豹猫妹妹', value: '豹猫妹妹' },
   { label: '纯白德文妹妹', value: '纯白德文妹妹' },
@@ -26,13 +26,13 @@ export const breeds = [
   { label: '棕虎斑缅因弟弟', value: '棕虎斑缅因弟弟' },
 ]
 
-// 店铺列表
+// 店铺列表 / Store list
 export const stores = [
   { label: '山东店', value: '山东店' },
   { label: '苏州店', value: '苏州店' },
 ]
 
-// 工作状态列表
+// 工作状态列表 / Work status list
 export const catCafeStatuses = [
   { label: '工作中', value: 'working' },
   { label: '休息中', value: 'resting' },
@@ -40,18 +40,35 @@ export const catCafeStatuses = [
   { label: '已退休', value: 'retired' },
   { label: '怀孕中', value: 'pregnant' },
   { label: '哺乳期', value: 'nursing' },
+  { label: '训练中', value: 'training' },
 ]
 
-// 状态颜色映射
-export const statusColors = new Map<CatCafeStatus, string>([
+// 状态颜色映射 / Status color mapping
+export const statusColors: Map<CatCafeStatus, string> = new Map([
   [
     'working',
     'bg-teal-100/30 text-teal-900 dark:text-teal-200 border-teal-200',
   ],
-  ['resting', 'bg-amber-100/30 text-amber-900 dark:text-amber-200 border-amber-200'],
-  ['sick', 'bg-destructive/10 dark:bg-destructive/50 text-destructive dark:text-primary border-destructive/10'],
+  [
+    'resting',
+    'bg-amber-100/30 text-amber-900 dark:text-amber-200 border-amber-200',
+  ],
+  [
+    'sick',
+    'bg-destructive/10 dark:bg-destructive/50 text-destructive dark:text-primary border-destructive/10',
+  ],
   ['retired', 'bg-neutral-300/40 border-neutral-300'],
-  ['pregnant', 'bg-pink-100/30 text-pink-900 dark:text-pink-200 border-pink-200'],
-  ['nursing', 'bg-purple-100/30 text-purple-900 dark:text-purple-200 border-purple-200'],
+  [
+    'pregnant',
+    'bg-pink-100/30 text-pink-900 dark:text-pink-200 border-pink-200',
+  ],
+  [
+    'nursing',
+    'bg-purple-100/30 text-purple-900 dark:text-purple-200 border-purple-200',
+  ],
+  [
+    'training',
+    'bg-blue-100/30 text-blue-900 dark:text-blue-200 border-blue-200',
+  ],
 ])
 

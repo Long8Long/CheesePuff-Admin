@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import type { Cat } from './schema'
+import type { Cat } from '../models'
 import { breeds, stores } from './data'
 
 faker.seed(12345)
@@ -70,7 +70,7 @@ function generateCat(id: number): Cat {
     id: idStr,
     name: faker.helpers.arrayElement(catNames),
     breed,
-    store: faker.helpers.arrayElement(stores).value,
+    store: faker.helpers.arrayElement(stores).value as '山东店' | '苏州店',
     birthday,
     price,
     images,
@@ -85,8 +85,8 @@ function generateCat(id: number): Cat {
       'nursing',
     ]),
     visible: faker.datatype.boolean(0.9), // 90% 可见
-    created_at: faker.date.past().toISOString(),
-    updated_at: faker.date.recent().toISOString(),
+    createdAt: faker.date.past().toISOString(),
+    updatedAt: faker.date.recent().toISOString(),
   }
 }
 
