@@ -7,7 +7,7 @@ import { Loader2, LogIn } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuthStore } from '@/stores/auth-store'
 import { cn } from '@/lib/utils'
-import api from '@/lib/api'
+import { authService } from '@/features/auth/services/auth.service'
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -50,17 +50,18 @@ export function UserAuthForm({
     setIsLoading(true)
 
     try {
-      const response = await api.post('/api/admin/auth/login', {
+      // Call auth service instead of direct API call
+      const response = await authService.login({
         username: data.username,
         password: data.password,
       })
 
-      const { code, message, data: responseData } = response.data
+      const { code, message, data: responseData } = response
 
       if (code === 200 && responseData) {
         // Set user and access token
         auth.setUser(responseData.user)
-        auth.setAccessToken(responseData.access_token)
+        auth.setAccessToken(responseData.accessToken)
 
         toast.success('Login successful!')
 
