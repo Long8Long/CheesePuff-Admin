@@ -1,0 +1,66 @@
+import { DotsHorizontalIcon } from '@radix-ui/react-icons'
+import { type Row } from '@tanstack/react-table'
+import { Pencil, Trash2 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import type { Store } from '../models/store.types'
+import { useStores } from './stores-provider'
+
+type DataTableRowActionsProps = {
+  row: Row<Store>
+}
+
+export function DataTableRowActions({
+  row,
+}: DataTableRowActionsProps) {
+  const store = row.original
+
+  const { setOpen, setCurrentRow } = useStores()
+
+  return (
+    <DropdownMenu modal={false}>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          className="flex h-8 w-8 p-0 data-[state=open]:bg-muted"
+        >
+          <DotsHorizontalIcon className="h-4 w-4" />
+          <span className="sr-only">打开菜单</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-[160px]">
+        <DropdownMenuItem
+          onClick={() => {
+            setCurrentRow(store)
+            setOpen('edit')
+          }}
+        >
+          编辑
+          <DropdownMenuShortcut>
+            <Pencil size={14} />
+          </DropdownMenuShortcut>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          onClick={() => {
+            setCurrentRow(store)
+            setOpen('delete')
+          }}
+          className="text-destructive focus:text-destructive"
+        >
+          删除
+          <DropdownMenuShortcut>
+            <Trash2 size={14} />
+          </DropdownMenuShortcut>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
