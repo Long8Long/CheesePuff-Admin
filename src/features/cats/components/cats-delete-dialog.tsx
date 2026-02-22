@@ -2,46 +2,47 @@
 
 import { useState } from 'react'
 import { type Table } from '@tanstack/react-table'
-import { AlertTriangle } from 'lucide-react'
+import { AlertTriangle, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
-import { sleep } from '@/lib/utils'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { ConfirmDialog } from '@/components/confirm-dialog'
 import type { Cat } from '../models'
+import { catsService } from '../services/cats.service'
 
 type CatDeleteDialogProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
   currentRow?: Cat | null
+  onSuccess?: () => void
 }
-
-const CONFIRM_WORD = 'DELETE'
 
 export function CatsDeleteDialog({
   open,
   onOpenChange,
   currentRow,
+  onSuccess,
 }: CatDeleteDialogProps) {
-  const [value, setValue] = useState('')
+  const [isDeleting, setIsDeleting] = useState(false)
 
-  const handleDelete = () => {
-    if (value.trim() !== CONFIRM_WORD) {
-      toast.error(`请输入 "${CONFIRM_WORD}" 来确认删除`)
-      return
+  const handleDelete = async () => {
+    if (!currentRow) return
+
+    setIsDeleting(true)
+
+    try {
+      await catsService.delete(currentRow.id)
+      toast.success(`已删除猫咪: ${currentRow.name || currentRow.id}`)
+
+      onOpenChange(false)
+
+      // 触发成功回调（刷新列表）
+      onSuccess?.()
+    } catch (error) {
+      const errorMessage = (error as { message?: string })?.message || '删除失败，请重试'
+      toast.error(errorMessage)
+    } finally {
+      setIsDeleting(false)
     }
-
-    onOpenChange(false)
-
-    toast.promise(sleep(1000), {
-      loading: '删除中...',
-      success: () => {
-        setValue('')
-        return `已删除猫咪: ${currentRow?.name}`
-      },
-      error: '删除失败',
-    })
   }
 
   return (
@@ -49,7 +50,7 @@ export function CatsDeleteDialog({
       open={open}
       onOpenChange={onOpenChange}
       handleConfirm={handleDelete}
-      disabled={value.trim() !== CONFIRM_WORD}
+      disabled={isDeleting}
       title={
         <span className='text-destructive'>
           <AlertTriangle
@@ -62,19 +63,10 @@ export function CatsDeleteDialog({
       desc={
         <div className='space-y-4'>
           <p className='mb-2'>
-            确定要删除猫咪 <strong>{currentRow?.name}</strong>
+            确定要删除猫咪 <strong>{currentRow?.name || currentRow?.id}</strong>
             吗？<br />
             此操作无法撤销。
           </p>
-
-          <Label className='my-4 flex flex-col items-start gap-1.5'>
-            <span className=''>请输入 "{CONFIRM_WORD}" 确认：</span>
-            <Input
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
-              placeholder={`输入 "${CONFIRM_WORD}" 确认删除`}
-            />
-          </Label>
 
           <Alert variant='destructive'>
             <AlertTitle>警告！</AlertTitle>
@@ -84,7 +76,14 @@ export function CatsDeleteDialog({
           </Alert>
         </div>
       }
-      confirmText='删除'
+      confirmText={isDeleting ? (
+        <>
+          <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+          删除中...
+        </>
+      ) : (
+        '删除'
+      )}
       destructive
     />
   )
@@ -94,34 +93,39 @@ type CatMultiDeleteDialogProps<TData> = {
   open: boolean
   onOpenChange: (open: boolean) => void
   table: Table<TData>
+  onSuccess?: () => void
 }
 
 export function CatsMultiDeleteDialog<TData>({
   open,
   onOpenChange,
   table,
+  onSuccess,
 }: CatMultiDeleteDialogProps<TData>) {
-  const [value, setValue] = useState('')
+  const [isDeleting, setIsDeleting] = useState(false)
 
   const selectedRows = table.getFilteredSelectedRowModel().rows
 
-  const handleDelete = () => {
-    if (value.trim() !== CONFIRM_WORD) {
-      toast.error(`请输入 "${CONFIRM_WORD}" 来确认删除`)
-      return
+  const handleDelete = async () => {
+    setIsDeleting(true)
+
+    try {
+      const ids = selectedRows.map((row) => (row.original as Cat).id)
+      await catsService.bulkDelete(ids)
+
+      toast.success(`已删除 ${selectedRows.length} 只猫咪`)
+      table.resetRowSelection()
+
+      onOpenChange(false)
+
+      // 触发成功回调（刷新列表）
+      onSuccess?.()
+    } catch (error) {
+      const errorMessage = (error as { message?: string })?.message || '删除失败，请重试'
+      toast.error(errorMessage)
+    } finally {
+      setIsDeleting(false)
     }
-
-    onOpenChange(false)
-
-    toast.promise(sleep(1000), {
-      loading: '删除中...',
-      success: () => {
-        setValue('')
-        table.resetRowSelection()
-        return `已删除 ${selectedRows.length} 只猫咪`
-      },
-      error: '删除失败',
-    })
   }
 
   return (
@@ -129,7 +133,7 @@ export function CatsMultiDeleteDialog<TData>({
       open={open}
       onOpenChange={onOpenChange}
       handleConfirm={handleDelete}
-      disabled={value.trim() !== CONFIRM_WORD}
+      disabled={isDeleting}
       title={
         <span className='text-destructive'>
           <AlertTriangle
@@ -146,15 +150,6 @@ export function CatsMultiDeleteDialog<TData>({
             此操作无法撤销。
           </p>
 
-          <Label className='my-4 flex flex-col items-start gap-1.5'>
-            <span className=''>请输入 "{CONFIRM_WORD}" 确认：</span>
-            <Input
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
-              placeholder={`输入 "${CONFIRM_WORD}" 确认删除`}
-            />
-          </Label>
-
           <Alert variant='destructive'>
             <AlertTitle>警告！</AlertTitle>
             <AlertDescription>
@@ -163,7 +158,14 @@ export function CatsMultiDeleteDialog<TData>({
           </Alert>
         </div>
       }
-      confirmText='删除'
+      confirmText={isDeleting ? (
+        <>
+          <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+          删除中...
+        </>
+      ) : (
+        '删除'
+      )}
       destructive
     />
   )

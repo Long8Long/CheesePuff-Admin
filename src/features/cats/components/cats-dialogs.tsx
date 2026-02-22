@@ -1,9 +1,16 @@
 import { CatsMutateDialog } from './cats-mutate-dialog'
 import { CatsDeleteDialog } from './cats-delete-dialog'
 import { useCats } from './cats-provider'
+import { useQueryClient } from '@tanstack/react-query'
 
 export function CatsDialogs() {
   const { open, setOpen, currentRow, setCurrentRow } = useCats()
+  const queryClient = useQueryClient()
+
+  const handleSuccess = () => {
+    // 刷新猫咪列表
+    queryClient.invalidateQueries({ queryKey: ['cats'] })
+  }
 
   return (
     <>
@@ -12,6 +19,7 @@ export function CatsDialogs() {
         key='cat-create'
         open={open === 'create'}
         onOpenChange={() => setOpen('create')}
+        onSuccess={handleSuccess}
       />
 
       {/* 编辑和删除对话框（需要 currentRow） */}
@@ -27,6 +35,7 @@ export function CatsDialogs() {
               }, 500)
             }}
             currentRow={currentRow}
+            onSuccess={handleSuccess}
           />
 
           <CatsDeleteDialog
@@ -39,6 +48,7 @@ export function CatsDialogs() {
               }, 500)
             }}
             currentRow={currentRow}
+            onSuccess={handleSuccess}
           />
         </>
       )}

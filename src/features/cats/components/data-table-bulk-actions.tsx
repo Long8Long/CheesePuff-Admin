@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { type Table } from '@tanstack/react-table'
+import { useQueryClient } from '@tanstack/react-query'
 import { Trash2, Eye, EyeOff } from 'lucide-react'
 import { toast } from 'sonner'
 import { sleep } from '@/lib/utils'
@@ -27,7 +28,13 @@ export function DataTableBulkActions<TData>({
   table,
 }: DataTableBulkActionsProps<TData>) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const queryClient = useQueryClient()
   const selectedRows = table.getFilteredSelectedRowModel().rows
+
+  const handleSuccess = () => {
+    // 刷新猫咪列表
+    queryClient.invalidateQueries({ queryKey: ['cats'] })
+  }
 
   const handleBulkStatusChange = (status: string) => {
     const statusLabel = catCafeStatuses.find((s) => s.value === status)?.label
@@ -143,6 +150,7 @@ export function DataTableBulkActions<TData>({
         open={showDeleteConfirm}
         onOpenChange={setShowDeleteConfirm}
         table={table}
+        onSuccess={handleSuccess}
       />
     </>
   )

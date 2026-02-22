@@ -2,8 +2,8 @@ import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState, useMemo, useEffect } from 'react'
-import { Sparkles } from 'lucide-react'
-import { showSubmittedData } from '@/lib/show-submitted-data'
+import { Sparkles, Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 import { getTodayString } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
@@ -30,8 +30,9 @@ import {
 } from '@/components/ui/dialog'
 import { SelectDropdown } from '@/components/select-dropdown'
 import { breeds as defaultBreeds, catCafeStatuses, stores } from '../data/data'
-import type { Cat } from '../models'
+import type { Cat, CatCreate, CatUpdate } from '../models'
 import type { CatAIOutput } from '../data/ai-schema'
+import { catsService } from '../services/cats.service'
 import { CatsAIFillTab } from './cats-ai-fill-tab'
 import { BreedDialog } from './breed-dialog'
 
@@ -39,18 +40,19 @@ type CatMutateDialogProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
   currentRow?: Cat | null
+  onSuccess?: () => void
 }
 
 const formSchema = z.object({
-  name: z.string().min(1, '名称不能为空'),
+  name: z.string().optional(),
   breed: z.string().min(1, '请选择品种'),
-  store: z.string().min(1, '请选择店铺'),
+  store: z.string().optional(),
   birthday: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, '日期格式错误'),
-  price: z.string().min(1, '请输入价格'),
-  image: z.string().min(1, '请上传一张图片'),
-  description: z.string().min(1, '描述不能为空'),
-  catcafeStatus: z.string().min(1, '请选择工作状态'),
-  visible: z.boolean(),
+  price: z.string().optional(),
+  image: z.string().optional(),
+  description: z.string().optional(),
+  catcafeStatus: z.string().optional(),
+  visible: z.boolean().optional(),
 })
 
 type CatForm = z.infer<typeof formSchema>
@@ -59,11 +61,13 @@ export function CatsMutateDialog({
   open,
   onOpenChange,
   currentRow,
+  onSuccess,
 }: CatMutateDialogProps) {
   const isUpdate = !!currentRow
   const [activeTab, setActiveTab] = useState<'ai' | 'manual'>('manual')
   const [aiFilledFields, setAiFilledFields] = useState<Set<string>>(new Set())
   const [customBreeds, setCustomBreeds] = useState<Array<{ label: string; value: string }>>([])
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   // 合并默认品种和自定义品种
   const breeds = useMemo(() => {
@@ -104,27 +108,53 @@ export function CatsMutateDialog({
         },
   })
 
-  const onSubmit = (data: CatForm) => {
-    // 将单个图片 URL 转换为数组（保持与现有数据结构兼容）
-    const images = [data.image]
+  const onSubmit = async (data: CatForm) => {
+    setIsSubmitting(true)
 
-    const formData: Omit<Cat, 'id' | 'createdAt' | 'updatedAt'> = {
-      name: data.name,
-      breed: data.breed,
-      store: data.store as Cat['store'],
-      birthday: data.birthday,
-      price: Number.parseFloat(data.price),
-      images,
-      thumbnail: data.image,
-      description: data.description,
-      catcafeStatus: data.catcafeStatus as Cat['catcafeStatus'],
-      visible: data.visible,
+    try {
+      // 辅助函数：将空字符串转为 null
+      const emptyStringToNull = <T,>(value: T | string | undefined): T | null => {
+        if (value === '' || value === undefined) return null
+        return value as T
+      }
+
+      // 构建请求数据
+      const requestData: CatCreate | CatUpdate = {
+        name: emptyStringToNull(data.name),
+        breed: data.breed,
+        store: emptyStringToNull(data.store),
+        birthday: data.birthday,
+        price: data.price ? Number.parseFloat(data.price) : null,
+        images: data.image ? [data.image] : null,
+        thumbnail: emptyStringToNull(data.image),
+        description: emptyStringToNull(data.description),
+        catcafeStatus: emptyStringToNull<Cat['catcafeStatus']>(data.catcafeStatus),
+        visible: data.visible ?? true,
+      }
+
+      if (isUpdate && currentRow) {
+        // 更新猫咪
+        await catsService.update(currentRow.id, requestData as CatUpdate)
+        toast.success('猫咪更新成功')
+      } else {
+        // 创建新猫咪
+        await catsService.create(requestData as CatCreate)
+        toast.success('猫咪添加成功')
+      }
+
+      // 关闭对话框并重置表单
+      onOpenChange(false)
+      form.reset()
+      setAiFilledFields(new Set())
+
+      // 触发成功回调（刷新列表）
+      onSuccess?.()
+    } catch (error) {
+      const errorMessage = (error as { message?: string })?.message || '操作失败，请重试'
+      toast.error(errorMessage)
+    } finally {
+      setIsSubmitting(false)
     }
-
-    onOpenChange(false)
-    form.reset()
-    setAiFilledFields(new Set())
-    showSubmittedData(isUpdate ? { ...currentRow, ...formData } : formData)
   }
 
   const handleAIFill = (data: CatAIOutput) => {
@@ -221,6 +251,8 @@ export function CatsMutateDialog({
                 onSubmit={onSubmit}
                 breeds={breeds}
                 onAddBreed={handleAddBreed}
+                isSubmitting={isSubmitting}
+                isUpdate={isUpdate}
               />
             </TabsContent>
           </Tabs>
@@ -236,17 +268,26 @@ export function CatsMutateDialog({
             onSubmit={onSubmit}
             breeds={breeds}
             onAddBreed={handleAddBreed}
+            isSubmitting={isSubmitting}
+            isUpdate={isUpdate}
           />
         )}
 
         {/* Dialog Footer - 只在编辑模式或手动填写 Tab 时显示 */}
         {(isUpdate || activeTab === 'manual') && (
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
+            <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
               取消
             </Button>
-            <Button form="cats-form" type="submit">
-              {isUpdate ? '保存' : '添加'}
+            <Button form="cats-form" type="submit" disabled={isSubmitting}>
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {isUpdate ? '保存中...' : '添加中...'}
+                </>
+              ) : (
+                isUpdate ? '保存' : '添加'
+              )}
             </Button>
           </DialogFooter>
         )}
@@ -264,6 +305,8 @@ function FormWrapper({
   onSubmit,
   breeds,
   onAddBreed,
+  isSubmitting,
+  isUpdate,
 }: {
   form: ReturnType<typeof useForm<CatForm>>
   aiFilledFields: Set<string>
@@ -272,6 +315,8 @@ function FormWrapper({
   onSubmit: (data: CatForm) => void
   breeds: Array<{ label: string; value: string }>
   onAddBreed: (name: string) => void
+  isSubmitting?: boolean
+  isUpdate?: boolean
 }) {
   const [showBreedDialog, setShowBreedDialog] = useState(false)
 
@@ -315,7 +360,7 @@ function FormWrapper({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    品种
+                   品种 <span className="text-destructive">*</span>
                     {aiFilledFields.has('breed') && <Badge />}
                   </FormLabel>
                   <div className="flex gap-2">
@@ -343,7 +388,7 @@ function FormWrapper({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    生日
+                    生日 <span className="text-destructive">*</span>
                     {aiFilledFields.has('birthday') && <Badge />}
                   </FormLabel>
                   <FormControl>
@@ -455,7 +500,7 @@ function FormWrapper({
                     onChange={field.onChange}
                   />
                 </FormControl>
-                <FormDescription>请上传一张猫咪图片</FormDescription>
+                <FormDescription>可选：上传一张猫咪图片</FormDescription>
                 <FormMessage />
               </FormItem>
             )}

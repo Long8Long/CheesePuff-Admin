@@ -29,6 +29,7 @@ import {
 import { DataTablePagination, DataTableToolbar } from '@/components/data-table'
 import { DataTableBulkActions } from './data-table-bulk-actions'
 import { catsColumns as columns } from './cats-columns'
+import { breeds, catCafeStatuses } from '../data/data'
 
 const route = getRouteApi('/_authenticated/cats')
 
