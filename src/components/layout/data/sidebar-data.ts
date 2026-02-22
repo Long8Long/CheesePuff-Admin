@@ -1,28 +1,14 @@
 import {
-  Construction,
-  LayoutDashboard,
   Monitor,
-  Bug,
-  FileX,
   HelpCircle,
-  Lock,
   Bell,
-  Package,
   Palette,
-  ServerOff,
   Settings,
   Wrench,
   UserCog,
-  UserX,
-  Users,
-  MessagesSquare,
-  ShieldCheck,
-  AudioWaveform,
-  Command,
-  GalleryVerticalEnd,
   Cat,
+  Command,
 } from 'lucide-react'
-import { ClerkLogo } from '@/assets/clerk-logo'
 import { type SidebarData } from '../types'
 
 export const sidebarData: SidebarData = {
@@ -37,16 +23,6 @@ export const sidebarData: SidebarData = {
       logo: Command,
       plan: 'Vite + ShadcnUI',
     },
-    {
-      name: 'Acme Inc',
-      logo: GalleryVerticalEnd,
-      plan: 'Enterprise',
-    },
-    {
-      name: 'Acme Corp.',
-      logo: AudioWaveform,
-      plan: 'Startup',
-    },
   ],
   navGroups: [
     {
@@ -56,6 +32,16 @@ export const sidebarData: SidebarData = {
           title: '猫咪管理',
           url: '/cats',
           icon: Cat,
+        },
+      ],
+    },
+    {
+      title: 'Other',
+      items: [
+        {
+          title: '设置',
+          icon: Settings,
+          url: '/settings'
         },
       ],
     },
