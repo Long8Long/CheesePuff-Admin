@@ -50,24 +50,34 @@ export function UserAuthForm({
     setIsLoading(true)
 
     try {
-      // Call auth service instead of direct API call
-      const response = await authService.login({
+      // Step 1: Call auth service to login and get access token
+      const loginResponse = await authService.login({
         username: data.username,
         password: data.password,
       })
 
-      const { code, message, data: responseData } = response
+      const { code, message, data: responseData } = loginResponse
 
       if (code === 200 && responseData) {
-        // Set user and access token
-        auth.setUser(responseData.user)
+        // Step 2: Set access token first (required for getCurrentUser call)
         auth.setAccessToken(responseData.accessToken)
 
-        toast.success('Login successful!')
+        // Step 3: Fetch current user info with the access token
+        const meResponse = await authService.getCurrentUser()
 
-        // Redirect to the stored location or default to dashboard
-        const targetPath = redirectTo || '/'
-        navigate({ to: targetPath, replace: true })
+        if (meResponse.code === 200 && meResponse.data) {
+          // Step 4: Set user from /me endpoint (includes all user fields)
+          auth.setUser(meResponse.data)
+          toast.success('Login successful!')
+        } else {
+          // Fallback to login response user data if /me fails
+          auth.setUser(responseData.user)
+          toast.success('Login successful!')
+        }
+
+        // Step 5: Redirect to cats page or the stored location
+        const targetPath = redirectTo || '/cats'
+        await navigate({ to: targetPath, replace: true })
       } else {
         toast.error(message || 'Login failed')
       }
