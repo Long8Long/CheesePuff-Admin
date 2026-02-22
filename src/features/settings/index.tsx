@@ -1,5 +1,5 @@
 import { Outlet } from '@tanstack/react-router'
-import { Monitor, Bell, Palette, Wrench, UserCog } from 'lucide-react'
+import { Monitor, Bell, Palette, Wrench, UserCog, Store, Settings2 } from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
 import { ConfigDrawer } from '@/components/config-drawer'
 import { Header } from '@/components/layout/header'
@@ -8,8 +8,7 @@ import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { SidebarNav } from './components/sidebar-nav'
-
-const sidebarNavItems = [
+const sidebarNavItemsOld = [
   {
     title: 'Profile',
     href: '/settings',
@@ -34,6 +33,19 @@ const sidebarNavItems = [
     title: 'Display',
     href: '/settings/display',
     icon: <Monitor size={18} />,
+  }
+]
+
+const sidebarNavItems = [
+  {
+    title: '门店管理',
+    href: '/settings/store-management',
+    icon: <Store size={18} />,
+  },
+  {
+    title: '猫舍配置',
+    href: '/settings/cattery-config',
+    icon: <Settings2 size={18} />,
   },
 ]
 
@@ -53,10 +65,10 @@ export function Settings() {
       <Main fixed>
         <div className='space-y-0.5'>
           <h1 className='text-2xl font-bold tracking-tight md:text-3xl'>
-            Settings
+            设置
           </h1>
           <p className='text-muted-foreground'>
-            Manage your account settings and set e-mail preferences.
+            管理您的设置。
           </p>
         </div>
         <Separator className='my-4 lg:my-6' />
