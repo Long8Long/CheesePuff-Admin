@@ -152,12 +152,12 @@ export function CatsMutateDialog({
       ? {
           name: currentRow.name ?? '',
           breed: currentRow.breed,
-          store: currentRow.store,
-          birthday: currentRow.birthday,
+          store: currentRow.store ?? undefined,
+          birthday: currentRow.birthday ?? undefined,
           price: String(currentRow.price ?? ''),
           image: currentRow.images?.[0] ?? '',
           description: currentRow.description ?? '',
-          catcafeStatus: currentRow.catcafeStatus,
+          catcafeStatus: currentRow.catcafeStatus ?? undefined,
           visible: currentRow.visible,
         }
       : {
@@ -316,8 +316,6 @@ export function CatsMutateDialog({
                 onSubmit={onSubmit}
                 breeds={breeds}
                 onAddBreed={handleAddBreed}
-                isSubmitting={isSubmitting}
-                isUpdate={isUpdate}
                 isLoadingBreeds={isLoadingBreeds}
                 apiStatuses={apiStatuses}
                 isLoadingStatuses={isLoadingStatuses}
@@ -338,8 +336,6 @@ export function CatsMutateDialog({
             onSubmit={onSubmit}
             breeds={breeds}
             onAddBreed={handleAddBreed}
-            isSubmitting={isSubmitting}
-            isUpdate={isUpdate}
             isLoadingBreeds={isLoadingBreeds}
             apiStatuses={apiStatuses}
             isLoadingStatuses={isLoadingStatuses}
@@ -380,8 +376,6 @@ function FormWrapper({
   onSubmit,
   breeds,
   onAddBreed,
-  isSubmitting,
-  isUpdate,
   isLoadingBreeds,
   apiStatuses,
   isLoadingStatuses,
@@ -395,8 +389,6 @@ function FormWrapper({
   onSubmit: (data: CatForm) => void
   breeds: Array<{ label: string; value: string }>
   onAddBreed: (name: string) => void
-  isSubmitting?: boolean
-  isUpdate?: boolean
   isLoadingBreeds?: boolean
   apiStatuses: Array<{ label: string; value: string }>
   isLoadingStatuses?: boolean

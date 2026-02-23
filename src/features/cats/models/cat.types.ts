@@ -34,15 +34,15 @@ export type Store = string
  */
 export interface Cat {
   id: string
-  name: string | null
+  name: string | null | undefined
   breed: string
   store: Store | null
   birthday: string | null
   price: number | null
   images: string[] | null
   thumbnail: string | null
-  description: string | null
-  catcafeStatus: CatCafeStatus | null
+  description: string | null | undefined
+  catcafeStatus: CatCafeStatus | null | undefined
   visible: boolean
   createdAt: string | undefined
   updatedAt: string | undefined
