@@ -1,11 +1,11 @@
 import {
-  Monitor,
-  HelpCircle,
-  Bell,
-  Palette,
+  // Monitor,
+  // HelpCircle,
+  // Bell,
+  // Palette,
   Settings,
-  Wrench,
-  UserCog,
+  // Wrench,
+  // UserCog,
   Cat,
   Command,
 } from 'lucide-react'
