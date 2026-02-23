@@ -4,7 +4,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect } from 'react'
 import { useAuthStore } from '@/stores/auth-store'
 import { showSubmittedData } from '@/lib/show-submitted-data'
-import { Button } from '@/components/ui/button'
 import {
   Form,
   FormControl,
@@ -64,7 +63,7 @@ export function ProfileForm() {
     }
   }, [user, form])
 
-  const { fields, append } = useFieldArray({
+  useFieldArray({
     name: 'urls',
     control: form.control,
   })

@@ -1,5 +1,5 @@
 import { Outlet } from '@tanstack/react-router'
-import { Monitor, Bell, Palette, Wrench, UserCog, Store, Settings2 } from 'lucide-react'
+import { /* Monitor, Bell, Palette, Wrench, */ UserCog, Store, Settings2 } from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
 import { ConfigDrawer } from '@/components/config-drawer'
 import { Header } from '@/components/layout/header'
@@ -8,33 +8,35 @@ import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { SidebarNav } from './components/sidebar-nav'
-const sidebarNavItemsOld = [
-  {
-    title: 'Profile',
-    href: '/settings',
-    icon: <UserCog size={18} />,
-  },
-  {
-    title: 'Account',
-    href: '/settings/account',
-    icon: <Wrench size={18} />,
-  },
-  {
-    title: 'Appearance',
-    href: '/settings/appearance',
-    icon: <Palette size={18} />,
-  },
-  {
-    title: 'Notifications',
-    href: '/settings/notifications',
-    icon: <Bell size={18} />,
-  },
-  {
-    title: 'Display',
-    href: '/settings/display',
-    icon: <Monitor size={18} />,
-  }
-]
+
+// TODO: Remove old nav items - no longer used
+// const sidebarNavItemsOld = [
+//   {
+//     title: 'Profile',
+//     href: '/settings',
+//     icon: <UserCog size={18} />,
+//   },
+//   {
+//     title: 'Account',
+//     href: '/settings/account',
+//     icon: <Wrench size={18} />,
+//   },
+//   {
+//     title: 'Appearance',
+//     href: '/settings/appearance',
+//     icon: <Palette size={18} />,
+//   },
+//   {
+//     title: 'Notifications',
+//     href: '/settings/notifications',
+//     icon: <Bell size={18} />,
+//   },
+//   {
+//     title: 'Display',
+//     href: '/settings/display',
+//     icon: <Monitor size={18} />,
+//   }
+// ]
 
 const sidebarNavItems = [
   {
