@@ -156,7 +156,7 @@ export function ProfileForm() {
             Add URL
           </Button>
         </div> */}
-        <Button type='submit'>更新个人资料</Button>
+        {/* <Button type='submit'>更新个人资料</Button> */}
       </form>
     </Form>
   )
