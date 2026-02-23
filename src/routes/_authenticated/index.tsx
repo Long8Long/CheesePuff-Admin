@@ -1,6 +1,11 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { Cats } from '@/features/cats'
+import { createFileRoute, redirect } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/_authenticated/')({
-  component: Cats,
+  beforeLoad: async () => {
+    // Redirect to cats page when accessing authenticated root
+    throw redirect({
+      to: '/cats',
+      replace: true,
+    })
+  },
 })
