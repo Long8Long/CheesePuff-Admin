@@ -26,7 +26,7 @@ export const sidebarData: SidebarData = {
   ],
   navGroups: [
     {
-      title: 'General',
+      title: '猫舍管理',
       items: [
         {
           title: '猫咪管理',
@@ -36,7 +36,7 @@ export const sidebarData: SidebarData = {
       ],
     },
     {
-      title: 'Other',
+      title: '设置',
       items: [
         {
           title: '设置',
