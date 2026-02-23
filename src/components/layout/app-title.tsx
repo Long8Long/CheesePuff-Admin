@@ -25,8 +25,8 @@ export function AppTitle() {
               onClick={() => setOpenMobile(false)}
               className='grid flex-1 text-start text-sm leading-tight'
             >
-              <span className='truncate font-bold'>Shadcn-Admin</span>
-              <span className='truncate text-xs'>Vite + ShadcnUI</span>
+              <span className='truncate font-bold'>猫舍管理系统</span>
+              <span className='truncate text-xs'>纳福猫舍</span>
             </Link>
             <ToggleSidebar />
           </div>
