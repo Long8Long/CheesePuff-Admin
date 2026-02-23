@@ -1,0 +1,71 @@
+**Statement:** Once the folder I belong to (including file structure, functional positioning, etc.) changes, please update me.
+
+## Member List
+- `route.tsx`
+  - Core function: Authenticated route guard and layout component;
+  - Technical details: beforeLoad hook validates access token from cookie, redirects to /sign-in if not authenticated, fetches current user info from API;
+  - Key parameters: beforeLoad (auth validation), redirect (to /sign-in), setUser action
+- `index.tsx`
+  - Core function: Root authenticated route, auto-redirects to /dashboard;
+  - Technical details: Simple redirect component for cleaner URLs;
+  - Key parameters: navigate({ to: '/dashboard', replace: true })
+- `dashboard.tsx`
+  - Core function: Dashboard page route, renders main dashboard view;
+  - Technical details: Displays @/features/dashboard component with analytics and overview;
+  - Key parameters: dashboard data, KPI cards, charts
+- `users/index.tsx`
+  - Core function: User management page route, renders user list and management UI;
+  - Technical details: Displays @/features/users component;
+  - Key parameters: users data, table state
+- `cats/route.tsx`
+  - Core function: Cat management page route with data table and URL state sync;
+  - Technical details: Renders @/features/cats component, uses useTableUrlState for pagination/filters/sorting in URL;
+  - Key parameters: cat data, URL state (page, pageSize, search, filters, sorting)
+- `apps/index.tsx`
+  - Core function: Applications management page route, renders apps list and management;
+  - Technical details: Displays @/features/apps component;
+  - Key parameters: applications data
+- `chats/index.tsx`
+  - Core function: Chat/messaging page route, renders chat interface;
+  - Technical details: Displays @/features/chats component;
+  - Key parameters: chat data, messages
+- `settings/route.tsx`
+  - Core function: Settings layout route with tabs navigation for settings sub-pages;
+  - Technical details: Tab-based layout using Outlet, renders tabs for profile/account/appearance/display/notifications/store-management/cattery-config;
+  - Key parameters: Outlet (settings tabs content), tabs navigation
+- `settings/index.tsx`
+  - Core function: Default settings tab route (general/profile settings);
+  - Technical details: Renders @/features/settings default component;
+  - Key parameters: settings data
+- `settings/account.tsx`
+  - Core function: Account settings route (password, email change);
+  - Technical details: Renders account settings form component;
+  - Key parameters: account form data
+- `settings/profile.tsx`
+  - Core function: User profile settings route (name, avatar, bio);
+  - Technical details: Renders profile settings form component;
+  - Key parameters: profile form data
+- `settings/appearance.tsx`
+  - Core function: Appearance settings route (theme, density);
+  - Technical details: Renders theme/density settings component;
+  - Key parameters: theme preference, density option
+- `settings/display.tsx`
+  - Core function: Display preferences route (language, timezone);
+  - Technical details: Renders language and timezone settings form;
+  - Key parameters: language selection, timezone selection
+- `settings/notifications.tsx`
+  - Core function: Notification preferences route;
+  - Technical details: Renders notification settings form (email, push, in-app);
+  - Key parameters: notification preferences
+- `settings/store-management.tsx`
+  - Core function: Store management settings route, renders store configuration page;
+  - Technical details: Displays @/features/settings/store-management component;
+  - Key parameters: store configuration data
+- `settings/cattery-config.tsx`
+  - Core function: Cattery configuration settings route, renders cat facility settings;
+  - Technical details: Displays @/features/settings/cattery-config component;
+  - Key parameters: cattery settings (capacity, facilities, etc.)
+- `errors/$error.tsx`
+  - Core function: Error boundary route for authenticated section;
+  - Technical details: Catches and displays errors within authenticated routes;
+  - Key parameters: error data, error component

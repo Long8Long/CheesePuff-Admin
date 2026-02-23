@@ -1,0 +1,47 @@
+**Statement:** Once the folder I belong to (including file structure, functional positioning, etc.) changes, please update me.
+
+## Member List
+- `app-sidebar.tsx`
+  - Core function: Main application sidebar navigation component, collapsible with menu items and user section;
+  - Technical details: Uses Shadcn UI Sidebar component, collapsible states (offcanvas/icon/none), integrates with navigation data;
+  - Key parameters: collapsible (sidebar behavior state), defaultCollapsed (initial collapsed state)
+- `app-title.tsx`
+  - Core function: Application title display in sidebar header, shows app name and version;
+  - Technical details: Displays logo/branding, links to home route, responsive text sizing;
+  - Key parameters: title (app name), variant (display style)
+- `authenticated-layout.tsx`
+  - Core function: Layout wrapper for authenticated pages, provides sidebar and header structure;
+  - Technical details: Renders AppSidebar and Header components, handles responsive layout behavior;
+  - Key parameters: Outlet (child route content)
+- `data/`
+  - Core function: Navigation menu data structure;
+  - Technical details: Contains nav-items.tsx with menu configuration;
+  - Key parameters: navItems (menu items array)
+- `header.tsx`
+  - Core function: Top header bar with breadcrumb, search, and actions;
+  - Technical details: Displays breadcrumb navigation, search trigger, settings toggle, user dropdown;
+  - Key parameters: sidebar (ref for mobile toggle), breadcrumb (current path)
+- `main.tsx`
+  - Core function: Main content area wrapper, handles scrollable content region;
+  - Technical details: Semantic main element with proper padding and scroll behavior;
+  - Key parameters: children (page content)
+- `nav-group.tsx`
+  - Core function: Navigation group component for organizing menu items with collapsible sections;
+  - Technical details: Renders menu item groups with title, collapsible state, icon support;
+  - Key parameters: item (nav item data with title, items array)
+- `nav-user.tsx`
+  - Core function: User menu in sidebar footer, displays user info and quick actions;
+  - Technical details: Shows user avatar/name, dropdown menu with profile, settings, sign out;
+  - Key parameters: user (current user data)
+- `team-switcher.tsx`
+  - Core function: Team/workspace switcher component for multi-tenant support;
+  - Technical details: Dropdown with team list, search functionality, create new team option;
+  - Key parameters: teams (array of team objects), defaultTeam (selected team)
+- `top-nav.tsx`
+  - Core function: Top navigation bar alternative to sidebar, horizontal menu layout;
+  - Technical details: Horizontal navigation with dropdown support, mobile-friendly;
+  - Key parameters: items (nav items array)
+- `types.ts`
+  - Core function: TypeScript type definitions for navigation components;
+  - Technical details: Exports NavItem, NavGroup, NavLink types;
+  - Key parameters: NavItem (navigation item interface)

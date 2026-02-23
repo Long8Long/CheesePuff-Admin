@@ -1,0 +1,31 @@
+**Statement:** Once the folder I belong to (including file structure, functional positioning, etc.) changes, please update me.
+
+## Member List
+- `bulk-actions.tsx`
+  - Core function: Bulk action bar for data table, displays row selection count and action buttons;
+  - Technical details: Shows selected rows count, provides delete and other bulk operations, integrates with table row selection state;
+  - Key parameters: selectedRows (array of selected row data), onClear (reset selection), table actions
+- `column-header.tsx`
+  - Core function: Table column header with sorting and hide/show functionality;
+  - Technical details: Displays column title, sortable indicator, hide column toggle, right-aligned menu;
+  - Key parameters: column (TanStack Table column), title (display text), onHide (column visibility callback)
+- `faceted-filter.tsx`
+  - Core function: Faceted filter component for column filtering with unique value extraction;
+  - Technical details: Extracts unique values from column data, displays as checkbox list, supports search within options;
+  - Key parameters: column (table column), title (filter label), options (filter choices)
+- `index.ts`
+  - Core function: Barrel export for data-table components;
+  - Technical details: Re-exports all data-table sub-components;
+  - Key parameters: exports (bulk-actions, column-header, faceted-filter, pagination, toolbar, view-options)
+- `pagination.tsx`
+  - Core function: Pagination controls for data table, page navigation and page size selection;
+  - Technical details: Shows current page info, previous/next buttons, page size dropdown, integrates with TanStack Table pagination;
+  - Key parameters: table (TanStack Table instance), pageSizeOptions (array of page size choices)
+- `toolbar.tsx`
+  - Core function: Table toolbar with search input, filter toggle, and column visibility;
+  - Technical details: Contains global filter input, faceted filter toggle, view options menu, refresh button;
+  - Key parameters: table (TanStack Table instance), filterableColumns (columns with faceted filters)
+- `view-options.tsx`
+  - Core function: Column visibility toggle menu, show/hide table columns;
+  - Technical details: Dropdown menu with checkboxes for each column, persists visibility state;
+  - Key parameters: table (TanStack Table instance)

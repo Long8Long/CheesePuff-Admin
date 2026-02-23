@@ -1,0 +1,31 @@
+**Statement:** Once the folder I belong to (including file structure, functional positioning, etc.) changes, please update me.
+
+## Member List
+- `auth-layout.tsx`
+  - Core function: Authentication layout wrapper, provides consistent styling for auth pages;
+  - Technical details: Centers content, responsive layout, background styling;
+  - Key parameters: children (auth page content)
+- `forgot-password/`
+  - Core function: Forgot password sub-feature with email submission form;
+  - Technical details: Request password reset email, validates email format;
+  - Key parameters: email input, submit handler
+- `models/`
+  - Core function: TypeScript types and interfaces for authentication domain models;
+  - Technical details: User, Auth, Credentials type definitions;
+  - Key parameters: User interface, AuthResponse, SignInCredentials, SignUpCredentials
+- `services/`
+  - Core function: Authentication API service layer for backend communication;
+  - Technical details: API calls for sign-in, sign-up, forgot-password, OTP verification;
+  - Key parameters: signIn(), signUp(), forgotPassword(), verifyOtp()
+- `sign-in/`
+  - Core function: Sign-in (login) sub-feature with email/password form and OAuth options;
+  - Technical details: Two sign-in page variants (sign-in.tsx, sign-in-2.tsx), supports OAuth providers;
+  - Key parameters: email, password, remember me, OAuth providers
+- `sign-up/`
+  - Core function: Sign-up (registration) sub-feature with user registration form;
+  - Technical details: New user account creation with validation, email verification flow;
+  - Key parameters: name, email, password, confirm password
+- `otp/`
+  - Core function: OTP (one-time password) verification sub-feature;
+  - Technical details: OTP code input with validation, auto-submit on complete;
+  - Key parameters: OTP code (6 digits), verify handler

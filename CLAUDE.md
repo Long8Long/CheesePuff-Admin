@@ -167,3 +167,14 @@ features/[feature-name]/
 - `utils.ts`: `cn()` 样式合并, `getPageNumbers()` 分页生成
 - `cookies.ts`: Cookie 操作（替代 js-cookie）
 - `handle-server-error.ts`: 统一错误处理
+
+## When to Create or Update CLAUDE.md
+
+Create or Update a `CLAUDE.md` file in a folder when:
+
+- A new folder is created for code organization (not for static assets or documentation)
+- The folder structure changes (files added, removed, or renamed)
+- The functionality of files in the folder needs clarification
+- Working with an unfamiliar codebase that lacks documentation
+
+**Skip for:** Documentation folders, static assets (images, fonts), test fixtures, or configuration-only directories.

@@ -1,0 +1,71 @@
+**Statement:** Once the folder I belong to (including file structure, functional positioning, etc.) changes, please update me.
+
+## Member List
+- `coming-soon.tsx`
+  - Core function: Placeholder component for unfinished features, display "Coming Soon" message with visual feedback;
+  - Technical details: Simple text component with icon, used in feature routes under development;
+  - Key parameters: title (optional heading text)
+- `command-menu.tsx`
+  - Core function: Global command palette (Cmd+K), provide quick navigation to routes and search functionality;
+  - Technical details: Uses Cmdk component from Shadcn UI, keyboard shortcuts support, theme-aware styling;
+  - Key parameters: open (boolean state), onOpenChange (callback)
+- `config-drawer.tsx`
+  - Core function: Settings configuration drawer/panel, display configuration options in slide-out panel;
+  - Technical details: Uses Sheet component from Shadcn UI, persisted state via localStorage;
+  - Key parameters: open (boolean), onOpenChange (callback), children (drawer content)
+- `confirm-dialog.tsx`
+  - Core function: Reusable confirmation dialog for destructive actions, require user confirmation before critical operations;
+  - Technical details: Uses AlertDialog from Shadcn UI, controlled open/close state;
+  - Key parameters: open (boolean), onOpenChange (callback), title (dialog heading), description (warning text), onConfirm (action callback)
+- `date-picker.tsx`
+  - Core function: Date selection component wrapper, provide calendar-based date input;
+  - Technical details: Wraps Calendar and Popover components from Shadcn UI, supports date range selection;
+  - Key parameters: date (selected date), onSelect (change handler), placeholder (input placeholder text)
+- `learn-more.tsx`
+  - Core function: Link component for documentation/help, open external links or documentation;
+  - Technical details: External link wrapper with icon, opens in new tab;
+  - Key parameters: href (link URL), title (link text)
+- `long-text.tsx`
+  - Core function: Truncated text with "Read More" expansion, collapse long content with expandable toggle;
+  - Technical details: Uses Collapsible component, character-based truncation with customizable threshold;
+  - Key parameters: text (content string), maxLength (truncation threshold), showMoreLabel (expand button text)
+- `navigation-progress.tsx`
+  - Core function: Page navigation loading bar at top of screen, show route transition progress;
+  - Technical details: Uses react-top-loading-bar, integrates with TanStack Router events;
+  - Key parameters: isRouting (loading state), color (progress bar color)
+- `password-input.tsx`
+  - Core function: Password input with show/hide toggle, secure password entry with visibility toggle;
+  - Technical details: Wraps Input component with Eye/EyeOff icon, toggles input type between password and text;
+  - Key parameters: value (input value), onChange (change handler), showToggle (visibility toggle button)
+- `search.tsx`
+  - Core function: Global search input component, provide search functionality for app-wide content;
+  - Technical details: Uses Input component with search icon, debounced input handling;
+  - Key parameters: value (search query), onChange (input handler), placeholder (input placeholder)
+- `select-dropdown.tsx`
+  - Core function: Reusable dropdown selection wrapper, standard select component with consistent styling;
+  - Technical details: Wraps Select component from Shadcn UI, supports custom options rendering;
+  - Key parameters: options (array of choices), value (selected value), onChange (selection handler), placeholder (default text)
+- `sign-out-dialog.tsx`
+  - Core function: Sign out confirmation dialog, clear auth state and redirect to sign-in;
+  - Technical details: Clears auth-store token, removes access token cookie, navigates to /sign-in route;
+  - Key parameters: open (boolean), onOpenChange (callback)
+- `skip-to-main.tsx`
+  - Core function: Accessibility skip link, allow keyboard users to skip to main content;
+  - Technical details: Hidden visually until focused (Tab key), jumps to main content anchor;
+  - Key parameters: label (link text, default: "Skip to main content")
+- `theme-switch.tsx`
+  - Core function: Theme toggle (light/dark/system), cycle through theme options with icon indicator;
+  - Technical details: Uses ThemeProvider context, persists preference to localStorage;
+  - Key parameters: themes (available theme options)
+- `lang-switch.tsx`
+  - Core function: Language switcher (Chinese/English), toggle between i18n locales;
+  - Technical details: Uses i18next language detection, persists preference to localStorage;
+  - Key parameters: currentLang (active language), onLangChange (language callback)
+- `cat-chat-widget.tsx`
+  - Core function: Cat-themed chat interface component, display chat UI for cat-related conversations;
+  - Technical details: Chat widget with cat avatar, message history display, input handling;
+  - Key parameters: messages (chat history array), onSendMessage (submit callback)
+- `profile-dropdown.tsx`
+  - Core function: User profile dropdown menu in header, display user info and navigation links;
+  - Technical details: Uses DropdownMenu from Shadcn UI, shows user avatar and name, links to profile/settings;
+  - Key parameters: user (current user data), onSignOut (logout callback)

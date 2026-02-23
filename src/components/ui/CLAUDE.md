@@ -1,0 +1,71 @@
+**Statement:** Once the folder I belong to (including file structure, functional positioning, etc.) changes, please update me.
+
+## Member List
+- `alert-dialog.tsx`
+  - Core function: Alert dialog for critical confirmations (destructive actions), requires user acknowledgment;
+  - Technical details: RTL support, uses AlertDialog from Radix UI;
+  - Key parameters: open, onOpenChange, title, description, cancelText, actionText, onAction
+- `alert.tsx`
+  - Core function: Alert banner for info/success/warning/error messages, dismissible;
+  - Technical details: Uses Alert from Radix UI with variant styling;
+  - Key parameters: variant (default/destructive), title, dismissible
+- `avatar.tsx`
+  - Core function: User avatar component with fallback initials, supports images and text;
+  - Technical details: Displays image or initials, configurable size;
+  - Key parameters: src (image URL), alt (alt text), fallback (initials)
+- `badge.tsx`
+  - Core function: Badge/label component for status indicators and counts;
+  - Technical details: Variants for different styles (default/secondary/destructive/outline);
+  - Key parameters: variant, children (badge content)
+- `button.tsx`
+  - Core function: Button component with variants, sizes, and loading states;
+  - Technical details: Multiple variants (default/ghost/link), sizes (default/sm/lg/icon), asChild for composition;
+  - Key parameters: variant, size, asChild, loading state
+- `calendar.tsx`
+  - Core function: Calendar date picker with single/range selection, month navigation;
+  - Technical details: RTL support, form integration, uses useCalendar hook internally;
+  - Key parameters: mode (single/range/multi), selected, onSelect, disabled, numberOfMonths
+- `card.tsx`
+  - Core function: Card container components (Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter);
+  - Technical details: Modular card structure for consistent layouts;
+  - Key parameters: title, description, footer content
+- `checkbox.tsx`
+  - Core function: Checkbox form control for boolean selections;
+  - Technical details: Form integration, checked/indeterminate states;
+  - Key parameters: checked, onCheckedChange, disabled
+- `collapsible.tsx`
+  - Core function: Collapsible content wrapper with open/close state;
+  - Technical details: Uses Collapsible from Radix UI;
+  - Key parameters: open, onOpenChange, children (trigger and content)
+- `command.tsx`
+  - Core function: Command palette for search-driven menus and dialogs;
+  - Technical details: Keyboard navigation, search filtering, dialog integration;
+  - Key parameters: open, onOpenChange, children (CommandInput, CommandList, CommandItem)
+- `dialog.tsx`
+  - Core function: Modal dialog for focused user interactions, overlay and escape handling;
+  - Technical details: RTL support, form integration, controlled open state;
+  - Key parameters: open, onOpenChange, children (DialogContent with header/body/footer)
+- `dropdown-menu.tsx`
+  - Core function: Dropdown menu for contextual actions and options;
+  - Technical details: RTL support, keyboard navigation, submenus;
+  - Key parameters: open, onOpenChange, trigger, children (DropdownMenuItem, DropdownMenuGroup)
+- `form.tsx`
+  - Core function: Form components with React Hook Form integration (FormItem, FormLabel, FormControl, FormMessage, FormField);
+  - Technical details: Type-safe form controls with validation;
+  - Key parameters: control (ReactHookForm control), name (field path), rules (validation)
+- `image-upload.tsx`
+  - Core function: Custom image upload component with preview and validation;
+  - Technical details: File input with drag-drop, image preview, size/type validation;
+  - Key parameters: value (image URL or File), onChange, maxSize, accept
+- `input-otp.tsx`
+  - Core function: OTP (one-time password) input with multiple character boxes;
+  - Technical details: Auto-focus next input, paste support, maxLength per input;
+  - Key parameters: value (OTP string), onChange, maxLength (total digits)
+- `input.tsx`
+  - Core function: Text input field for forms, supports various text-based inputs;
+  - Technical details: Form integration, error state styling;
+  - Key parameters: value, onChange, disabled, type (text/password/email/etc)
+- `label.tsx`
+  - Core function: Form label for accessibility and semantic association;
+  - Technical details: Associates with form controls via htmlFor;
+  - Key parameters: htmlFor (input id), children (label text)

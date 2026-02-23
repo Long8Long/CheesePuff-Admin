@@ -1,0 +1,39 @@
+**Statement:** Once the folder I belong to (including file structure, functional positioning, etc.) changes, please update me.
+
+## Member List
+- `index.tsx`
+  - Core function: Settings main page with tab navigation to all settings sub-pages;
+  - Technical details: Tab-based layout (Profile, Account, Appearance, Display, Notifications, Store Management, Cattery Config);
+  - Key parameters: active tab, settings data
+- `account/`
+  - Core function: Account settings sub-feature (password change, email update);
+  - Technical details: Form components for account security settings;
+  - Key parameters: password form, email update form
+- `appearance/`
+  - Core function: Appearance settings sub-feature (theme, density preferences);
+  - Technical details: Theme toggle (light/dark), layout density options;
+  - Key parameters: theme state, density preference
+- `cattery-config/`
+  - Core function: Cattery configuration sub-feature for cat facility management;
+  - Technical details: Cattery settings form with capacity, facilities, and equipment configuration;
+  - Key parameters: cattery settings (capacity, facilities, equipment)
+- `components/`
+  - Core function: Shared settings UI components;
+  - Technical details: Includes settings-layout, settings-form, settings-card components;
+  - Key parameters: settings data, form handlers
+- `display/`
+  - Core function: Display preferences sub-feature (language, timezone);
+  - Technical details: Language selection, timezone configuration;
+  - Key parameters: language state, timezone preference
+- `notifications/`
+  - Core function: Notification preferences sub-feature;
+  - Technical details: Email, push, and in-app notification toggles;
+  - Key parameters: notification preferences object
+- `profile/`
+  - Core function: User profile settings sub-feature (name, avatar, bio);
+  - Technical details: Profile editing form with image upload;
+  - Key parameters: profile data (name, avatar, bio)
+- `store-management/`
+  - Core function: Store management settings sub-feature for store configuration;
+  - Technical details: Store settings form with business info, hours, contact details;
+  - Key parameters: store configuration data
