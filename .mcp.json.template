@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "chrome-devtools": {
+      "command": "npx",
+      "args": ["-y", "chrome-devtools-mcp@latest"]
+    },
+    "CheesePuff - API 文档": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "apifox-mcp-server@latest",
+        "--project-id=7368467"
+      ],
+      "env": {
+        "APIFOX_ACCESS_TOKEN": "<access_token>"
+      }
+    }
+  }
+}

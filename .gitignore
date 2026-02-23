@@ -1,6 +1,7 @@
 # Claude Code
 settings.json
 settings.local.json
+.mcp.json
 
 # Logs
 logs
