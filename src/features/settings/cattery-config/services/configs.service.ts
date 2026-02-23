@@ -21,4 +21,9 @@ export const configsService = {
     const response = await api.put(`/api/v1/admin/configs/${key}`, data)
     return response.data
   },
+
+  getByKey: async (key: string): Promise<Config> => {
+    const response = await api.get(`/api/v1/admin/configs/${key}`)
+    return response.data
+  },
 }

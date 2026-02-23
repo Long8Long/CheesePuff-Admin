@@ -29,12 +29,13 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { SelectDropdown } from '@/components/select-dropdown'
-import { breeds as defaultBreeds, catCafeStatuses, stores } from '../data/data'
+import { stores } from '../data/data'
 import type { Cat, CatCreate, CatUpdate } from '../models'
 import type { CatAIOutput } from '../data/ai-schema'
 import { catsService } from '../services/cats.service'
 import { CatsAIFillTab } from './cats-ai-fill-tab'
 import { BreedDialog } from './breed-dialog'
+import { configsService } from '@/features/settings/cattery-config/services/configs.service'
 
 type CatMutateDialogProps = {
   open: boolean
@@ -66,13 +67,53 @@ export function CatsMutateDialog({
   const isUpdate = !!currentRow
   const [activeTab, setActiveTab] = useState<'ai' | 'manual'>('manual')
   const [aiFilledFields, setAiFilledFields] = useState<Set<string>>(new Set())
+  const [apiBreeds, setApiBreeds] = useState<Array<{ label: string; value: string }>>([])
+  const [apiStatuses, setApiStatuses] = useState<Array<{ label: string; value: string }>>([])
   const [customBreeds, setCustomBreeds] = useState<Array<{ label: string; value: string }>>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isLoadingBreeds, setIsLoadingBreeds] = useState(true)
+  const [isLoadingStatuses, setIsLoadingStatuses] = useState(true)
 
-  // 合并默认品种和自定义品种
+  // Fetch breeds and statuses from API on component mount
+  useEffect(() => {
+    const fetchConfigData = async () => {
+      try {
+        setIsLoadingBreeds(true)
+        setIsLoadingStatuses(true)
+
+        // Fetch breeds
+        const breedsResponse = await configsService.getByKey('cat_breeds')
+        const breedValues = breedsResponse.value as string[]
+        const breeds = breedValues.map((breed) => ({
+          label: breed,
+          value: breed,
+        }))
+        setApiBreeds(breeds)
+
+        // Fetch statuses
+        const statusesResponse = await configsService.getByKey('cat_statuses')
+        const statusValues = statusesResponse.value as string[]
+        const statuses = statusValues.map((status) => ({
+          label: status,
+          value: status,
+        }))
+        setApiStatuses(statuses)
+      } catch (error) {
+        console.error('Failed to fetch cat config data:', error)
+        toast.error('获取配置数据失败')
+      } finally {
+        setIsLoadingBreeds(false)
+        setIsLoadingStatuses(false)
+      }
+    }
+
+    fetchConfigData()
+  }, [])
+
+  // 合并API品种和自定义品种
   const breeds = useMemo(() => {
-    return [...defaultBreeds, ...customBreeds]
-  }, [customBreeds])
+    return [...apiBreeds, ...customBreeds]
+  }, [apiBreeds, customBreeds])
 
   const handleAddBreed = (name: string) => {
     const newBreed = { label: name, value: name }
@@ -253,6 +294,9 @@ export function CatsMutateDialog({
                 onAddBreed={handleAddBreed}
                 isSubmitting={isSubmitting}
                 isUpdate={isUpdate}
+                isLoadingBreeds={isLoadingBreeds}
+                apiStatuses={apiStatuses}
+                isLoadingStatuses={isLoadingStatuses}
               />
             </TabsContent>
           </Tabs>
@@ -270,6 +314,9 @@ export function CatsMutateDialog({
             onAddBreed={handleAddBreed}
             isSubmitting={isSubmitting}
             isUpdate={isUpdate}
+            isLoadingBreeds={isLoadingBreeds}
+            apiStatuses={apiStatuses}
+            isLoadingStatuses={isLoadingStatuses}
           />
         )}
 
@@ -307,6 +354,9 @@ function FormWrapper({
   onAddBreed,
   isSubmitting,
   isUpdate,
+  isLoadingBreeds,
+  apiStatuses,
+  isLoadingStatuses,
 }: {
   form: ReturnType<typeof useForm<CatForm>>
   aiFilledFields: Set<string>
@@ -317,6 +367,9 @@ function FormWrapper({
   onAddBreed: (name: string) => void
   isSubmitting?: boolean
   isUpdate?: boolean
+  isLoadingBreeds?: boolean
+  apiStatuses: Array<{ label: string; value: string }>
+  isLoadingStatuses?: boolean
 }) {
   const [showBreedDialog, setShowBreedDialog] = useState(false)
 
@@ -367,13 +420,17 @@ function FormWrapper({
                     <SelectDropdown
                       defaultValue={field.value}
                       onValueChange={field.onChange}
-                      placeholder="请选择品种"
+                      placeholder={isLoadingBreeds ? '加载品种列表中...' : '请选择品种'}
                       items={breeds}
                       allowAddNew
                       onAddNew={() => setShowBreedDialog(true)}
                       addNewLabel="添加新品种"
                       className="flex-1"
+                      disabled={isLoadingBreeds}
                     />
+                    {isLoadingBreeds && (
+                      <Loader2 className="h-10 w-10 animate-spin text-muted-foreground" />
+                    )}
                   </div>
                   <FormMessage />
                 </FormItem>
@@ -466,12 +523,19 @@ function FormWrapper({
                     工作状态
                     {aiFilledFields.has('catcafeStatus') && <Badge />}
                   </FormLabel>
-                  <SelectDropdown
-                    defaultValue={field.value}
-                    onValueChange={field.onChange}
-                    placeholder="请选择状态"
-                    items={catCafeStatuses}
-                  />
+                  <div className="flex gap-2">
+                    <SelectDropdown
+                      defaultValue={field.value}
+                      onValueChange={field.onChange}
+                      placeholder={isLoadingStatuses ? '加载状态列表中...' : '请选择状态'}
+                      items={apiStatuses}
+                      className="flex-1"
+                      disabled={isLoadingStatuses}
+                    />
+                    {isLoadingStatuses && (
+                      <Loader2 className="h-10 w-10 animate-spin text-muted-foreground" />
+                    )}
+                  </div>
                   <FormMessage />
                 </FormItem>
               )}
