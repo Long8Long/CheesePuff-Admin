@@ -1,45 +1,36 @@
 import { z } from 'zod'
 import { useFieldArray, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Link } from '@tanstack/react-router'
+import { useEffect } from 'react'
+import { useAuthStore } from '@/stores/auth-store'
 import { showSubmittedData } from '@/lib/show-submitted-data'
-import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
 
 const profileFormSchema = z.object({
   username: z
-    .string('Please enter your username.')
-    .min(2, 'Username must be at least 2 characters.')
-    .max(30, 'Username must not be longer than 30 characters.'),
+    .string('请输入用户名。')
+    .min(2, '用户名至少需要2个字符。')
+    .max(30, '用户名不能超过30个字符。'),
   email: z.email({
     error: (iss) =>
       iss.input === undefined
-        ? 'Please select an email to display.'
+        ? '请选择要显示的邮箱。'
         : undefined,
   }),
-  bio: z.string().max(160).min(4),
+  bio: z.string().max(160).min(4).optional(),
   urls: z
     .array(
       z.object({
-        value: z.url('Please enter a valid URL.'),
+        value: z.url('请输入有效的URL。'),
       })
     )
     .optional(),
@@ -57,11 +48,21 @@ const defaultValues: Partial<ProfileFormValues> = {
 }
 
 export function ProfileForm() {
+  const { user } = useAuthStore((state) => state.auth)
+
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues,
     mode: 'onChange',
   })
+
+  // Pre-fill form with user data from auth store
+  useEffect(() => {
+    if (user) {
+      form.setValue('username', user.username)
+      form.setValue('email', user.email)
+    }
+  }, [user, form])
 
   const { fields, append } = useFieldArray({
     name: 'urls',
@@ -79,14 +80,10 @@ export function ProfileForm() {
           name='username'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Username</FormLabel>
+              <FormLabel>用户名</FormLabel>
               <FormControl>
-                <Input placeholder='shadcn' {...field} />
+                <Input placeholder='请输入用户名' {...field} />
               </FormControl>
-              <FormDescription>
-                This is your public display name. It can be your real name or a
-                pseudonym. You can only change this once every 30 days.
-              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -96,28 +93,16 @@ export function ProfileForm() {
           name='email'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder='Select a verified email to display' />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value='m@example.com'>m@example.com</SelectItem>
-                  <SelectItem value='m@google.com'>m@google.com</SelectItem>
-                  <SelectItem value='m@support.com'>m@support.com</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormDescription>
-                You can manage verified email addresses in your{' '}
-                <Link to='/'>email settings</Link>.
-              </FormDescription>
+              <FormLabel>邮箱</FormLabel>
+              <FormControl>
+                <Input placeholder='请输入邮箱' {...field} />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        <FormField
+        {/* Bio field - hidden (not in User model) */}
+        {/* <FormField
           control={form.control}
           name='bio'
           render={({ field }) => (
@@ -137,8 +122,9 @@ export function ProfileForm() {
               <FormMessage />
             </FormItem>
           )}
-        />
-        <div>
+        /> */}
+        {/* URLs field - hidden (not in User model) */}
+        {/* <div>
           {fields.map((field, index) => (
             <FormField
               control={form.control}
@@ -169,8 +155,8 @@ export function ProfileForm() {
           >
             Add URL
           </Button>
-        </div>
-        <Button type='submit'>Update profile</Button>
+        </div> */}
+        <Button type='submit'>更新个人资料</Button>
       </form>
     </Form>
   )

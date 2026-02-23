@@ -38,6 +38,11 @@ const sidebarNavItemsOld = [
 
 const sidebarNavItems = [
   {
+    title: '个人信息',
+    href: '/settings',
+    icon: <UserCog size={18} />,
+  },
+  {
     title: '门店管理',
     href: '/settings/store-management',
     icon: <Store size={18} />,
