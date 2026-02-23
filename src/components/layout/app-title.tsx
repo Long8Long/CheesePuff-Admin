@@ -28,7 +28,7 @@ export function AppTitle() {
               <span className='truncate font-bold'>猫舍管理系统</span>
               <span className='truncate text-xs'>纳福猫舍</span>
             </Link>
-            <ToggleSidebar />
+            {/* <ToggleSidebar /> */}
           </div>
         </SidebarMenuButton>
       </SidebarMenuItem>
