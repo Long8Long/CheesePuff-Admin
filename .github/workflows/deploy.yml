@@ -1,0 +1,143 @@
+name: Deploy Docker to Production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  IMAGE_NAME: cheesepuff-admin
+  CONTAINER_NAME: cheesepuff-admin
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ steps.version.outputs.tag }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Generate version tag
+        id: version
+        run: |
+          TAG="v$(date +%Y%m%d-%H%M%S)-$(git rev-parse --short HEAD)"
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "Generated tag: $TAG"
+
+      - name: Create deployment archive
+        run: |
+          mkdir -p deploy_temp
+          rsync -a --exclude='.git' \
+                --exclude='node_modules' \
+                --exclude='*.log' \
+                --exclude='.env.local' \
+                --exclude='.env.*.local' \
+                --exclude='.env.development' \
+                --exclude='.env.test' \
+                --exclude='.DS_Store' \
+                --exclude='Thumbs.db' \
+                --exclude='coverage' \
+                --exclude='.nyc_output' \
+                --exclude='.eslintrc*' \
+                --exclude='.prettierrc*' \
+                --exclude='.gitignore' \
+                --exclude='README*' \
+                --exclude='CLAUDE.md' \
+                --exclude='*.md' \
+                . deploy_temp/
+
+          cd deploy_temp && tar -czf ../deploy.tar.gz . && cd ..
+          rm -rf deploy_temp
+
+      - name: Copy to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.HW_HOST }}
+          username: ${{ secrets.HW_USERNAME }}
+          key: ${{ secrets.HW_PRIVATE_KEY }}
+          port: ${{ secrets.HW_PORT || 22 }}
+          source: 'deploy.tar.gz'
+          target: '${{ secrets.HW_TARGET_DIR }}'
+          timeout: 300s
+
+      - name: Deploy Docker container
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HW_HOST }}
+          username: ${{ secrets.HW_USERNAME }}
+          key: ${{ secrets.HW_PRIVATE_KEY }}
+          port: ${{ secrets.HW_PORT || 22 }}
+          script: |
+            IMAGE_TAG="${{ steps.version.outputs.tag }}"
+            IMAGE_NAME="${{ env.IMAGE_NAME }}"
+            CONTAINER_NAME="${{ env.CONTAINER_NAME }}"
+
+            echo "=========================================="
+            echo "Deploying version: $IMAGE_NAME:$IMAGE_TAG"
+            echo "=========================================="
+
+            cd ${{ secrets.HW_TARGET_DIR }}
+
+            BACKUP_DIR="backup_$(date +%Y%m%d_%H%M%S)"
+            mkdir -p "$BACKUP_DIR"
+
+            find . -maxdepth 1 -mindepth 1 \
+              ! -name '.' \
+              ! -name 'backup_*' \
+              ! -name 'deploy.tar.gz' \
+              -exec cp -r {} "$BACKUP_DIR"/ \;
+
+            echo "Backup created: $BACKUP_DIR"
+
+            tar -xzf deploy.tar.gz
+            rm -f deploy.tar.gz
+
+            if docker ps -a --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
+              echo "Stopping old container: ${CONTAINER_NAME}"
+              docker stop ${CONTAINER_NAME} || true
+              docker rm ${CONTAINER_NAME} || true
+            fi
+
+            echo "Building Docker image: ${IMAGE_NAME}:${IMAGE_TAG}"
+            docker build -t ${IMAGE_NAME}:${IMAGE_TAG} -t ${IMAGE_NAME}:latest .
+
+            echo "Starting new container..."
+            # Note: Container runs on internal network only (port 80)
+            # Nginx proxy (nginx-proxy) should be running separately on host port 8000
+            docker run -d \
+              --name ${CONTAINER_NAME} \
+              --network 1panel-network \
+              --restart unless-stopped \
+              ${IMAGE_NAME}:${IMAGE_TAG}
+
+            sleep 5
+
+            if docker ps --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
+              echo "=========================================="
+              echo "✓ Deployment successful!"
+              echo "Image version: ${IMAGE_NAME}:${IMAGE_TAG}"
+              echo "Container status:"
+              docker ps --filter "name=${CONTAINER_NAME}" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+              echo "=========================================="
+              echo ""
+              echo "Recent image versions:"
+              docker images ${IMAGE_NAME} --format "table {{.Repository}}\t{{.Tag}}\t{{.Size}}\t{{.CreatedAt}}" | head -6
+            else
+              echo "✗ Deployment failed! Container not running"
+              echo ""
+              echo "Container logs:"
+              docker logs ${CONTAINER_NAME}
+              exit 1
+            fi
+
+            echo "Cleaning old images (keep recent 5 versions)..."
+            docker images ${IMAGE_NAME} --format "{{.ID}}:{{.Tag}}" | \
+              tail -n +6 | \
+              awk -F: '{print $1}' | \
+              xargs -r docker rmi -f || true
+
+            docker image prune -f
+
+            ls -dt backup_* 2>/dev/null | tail -n +4 | xargs -r rm -rf
