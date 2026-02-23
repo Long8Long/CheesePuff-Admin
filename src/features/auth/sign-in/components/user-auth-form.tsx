@@ -21,8 +21,8 @@ import { Input } from '@/components/ui/input'
 import { PasswordInput } from '@/components/password-input'
 
 const formSchema = z.object({
-  username: z.string().min(1, 'Please enter your username'),
-  password: z.string().min(1, 'Please enter your password'),
+  username: z.string().min(1, '请输入用户名'),
+  password: z.string().min(1, '请输入密码'),
 })
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLFormElement> {
@@ -68,23 +68,23 @@ export function UserAuthForm({
         if (meResponse.code === 200 && meResponse.data) {
           // Step 4: Set user from /me endpoint (includes all user fields)
           auth.setUser(meResponse.data)
-          toast.success('Login successful!')
+          toast.success('登录成功！')
         } else {
           // Fallback to login response user data if /me fails
           auth.setUser(responseData.user)
-          toast.success('Login successful!')
+          toast.success('登录成功！')
         }
 
         // Step 5: Redirect to cats page or the stored location
         const targetPath = redirectTo || '/cats'
         await navigate({ to: targetPath, replace: true })
       } else {
-        toast.error(message || 'Login failed')
+        toast.error(message || '登录失败')
       }
     } catch (error: unknown) {
       const errorMessage =
         (error as { message?: string })?.message ||
-        'Network error, please try again'
+        '网络错误，请重试'
       toast.error(errorMessage)
     } finally {
       setIsLoading(false)
@@ -103,9 +103,9 @@ export function UserAuthForm({
           name='username'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Username</FormLabel>
+              <FormLabel>用户名</FormLabel>
               <FormControl>
-                <Input placeholder='Enter your username' {...field} />
+                <Input placeholder='请输入用户名' {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -116,7 +116,7 @@ export function UserAuthForm({
           name='password'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Password</FormLabel>
+              <FormLabel>密码</FormLabel>
               <FormControl>
                 <PasswordInput placeholder='********' {...field} />
               </FormControl>
@@ -126,7 +126,7 @@ export function UserAuthForm({
         />
         <Button className='mt-2' disabled={isLoading}>
           {isLoading ? <Loader2 className='animate-spin' /> : <LogIn />}
-          Sign in
+          登录
         </Button>
       </form>
     </Form>
