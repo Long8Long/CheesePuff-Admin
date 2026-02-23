@@ -2,16 +2,8 @@ import { z } from 'zod'
 import type { Cat, CatCafeStatus, Store } from '../models'
 
 // Define the enum separately for reuse / 单独定义枚举以便复用
-const catCafeStatusEnum = z.enum([
-  'working',
-  'resting',
-  'sick',
-  'retired',
-  'pregnant',
-  'nursing',
-  'training',
-])
-const storeEnum = z.enum(['山东店', '苏州店'])
+const catCafeStatusEnum = z.string()
+const storeEnum = z.string()
 
 /**
  * Zod schema for Cat validation

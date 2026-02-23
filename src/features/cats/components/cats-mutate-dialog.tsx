@@ -29,13 +29,13 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { SelectDropdown } from '@/components/select-dropdown'
-import { stores } from '../data/data'
 import type { Cat, CatCreate, CatUpdate } from '../models'
 import type { CatAIOutput } from '../data/ai-schema'
 import { catsService } from '../services/cats.service'
 import { CatsAIFillTab } from './cats-ai-fill-tab'
 import { BreedDialog } from './breed-dialog'
 import { configsService } from '@/features/settings/cattery-config/services/configs.service'
+import { storesService } from '@/features/settings/store-management/services/stores.service'
 
 type CatMutateDialogProps = {
   open: boolean
@@ -69,17 +69,20 @@ export function CatsMutateDialog({
   const [aiFilledFields, setAiFilledFields] = useState<Set<string>>(new Set())
   const [apiBreeds, setApiBreeds] = useState<Array<{ label: string; value: string }>>([])
   const [apiStatuses, setApiStatuses] = useState<Array<{ label: string; value: string }>>([])
+  const [apiStores, setApiStores] = useState<Array<{ label: string; value: string }>>([])
   const [customBreeds, setCustomBreeds] = useState<Array<{ label: string; value: string }>>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isLoadingBreeds, setIsLoadingBreeds] = useState(true)
   const [isLoadingStatuses, setIsLoadingStatuses] = useState(true)
+  const [isLoadingStores, setIsLoadingStores] = useState(true)
 
-  // Fetch breeds and statuses from API on component mount
+  // Fetch breeds, statuses and stores from API on component mount
   useEffect(() => {
     const fetchConfigData = async () => {
       try {
         setIsLoadingBreeds(true)
         setIsLoadingStatuses(true)
+        setIsLoadingStores(true)
 
         // Fetch breeds
         const breedsResponse = await configsService.getByKey('cat_breeds')
@@ -98,12 +101,23 @@ export function CatsMutateDialog({
           value: status,
         }))
         setApiStatuses(statuses)
+
+        // Fetch stores
+        const storesResponse = await storesService.getList({ activeOnly: true })
+        const stores = storesResponse.stores
+          .filter((store) => store.isActive)
+          .map((store) => ({
+            label: store.name,
+            value: store.name,
+          }))
+        setApiStores(stores)
       } catch (error) {
         console.error('Failed to fetch cat config data:', error)
         toast.error('获取配置数据失败')
       } finally {
         setIsLoadingBreeds(false)
         setIsLoadingStatuses(false)
+        setIsLoadingStores(false)
       }
     }
 
@@ -114,6 +128,16 @@ export function CatsMutateDialog({
   const breeds = useMemo(() => {
     return [...apiBreeds, ...customBreeds]
   }, [apiBreeds, customBreeds])
+
+  // 获取默认店铺（第一个激活的店铺）
+  const defaultStore = useMemo(() => {
+    return apiStores.length > 0 ? apiStores[0].value : ''
+  }, [apiStores])
+
+  // 获取默认工作状态（第一个状态）
+  const defaultStatus = useMemo(() => {
+    return apiStatuses.length > 0 ? apiStatuses[0].value : ''
+  }, [apiStatuses])
 
   const handleAddBreed = (name: string) => {
     const newBreed = { label: name, value: name }
@@ -139,12 +163,12 @@ export function CatsMutateDialog({
       : {
           name: '',
           breed: '',
-          store: '山东店',
+          store: defaultStore || undefined,
           birthday: getTodayString(),
           price: '',
           image: '',
           description: '',
-          catcafeStatus: 'working',
+          catcafeStatus: defaultStatus || undefined,
           visible: true,
         },
   })
@@ -297,6 +321,8 @@ export function CatsMutateDialog({
                 isLoadingBreeds={isLoadingBreeds}
                 apiStatuses={apiStatuses}
                 isLoadingStatuses={isLoadingStatuses}
+                apiStores={apiStores}
+                isLoadingStores={isLoadingStores}
               />
             </TabsContent>
           </Tabs>
@@ -317,6 +343,8 @@ export function CatsMutateDialog({
             isLoadingBreeds={isLoadingBreeds}
             apiStatuses={apiStatuses}
             isLoadingStatuses={isLoadingStatuses}
+            apiStores={apiStores}
+            isLoadingStores={isLoadingStores}
           />
         )}
 
@@ -357,6 +385,8 @@ function FormWrapper({
   isLoadingBreeds,
   apiStatuses,
   isLoadingStatuses,
+  apiStores,
+  isLoadingStores,
 }: {
   form: ReturnType<typeof useForm<CatForm>>
   aiFilledFields: Set<string>
@@ -370,6 +400,8 @@ function FormWrapper({
   isLoadingBreeds?: boolean
   apiStatuses: Array<{ label: string; value: string }>
   isLoadingStatuses?: boolean
+  apiStores: Array<{ label: string; value: string }>
+  isLoadingStores?: boolean
 }) {
   const [showBreedDialog, setShowBreedDialog] = useState(false)
 
@@ -461,12 +493,19 @@ function FormWrapper({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>店铺</FormLabel>
-                  <SelectDropdown
-                    defaultValue={field.value}
-                    onValueChange={field.onChange}
-                    placeholder="请选择店铺"
-                    items={stores}
-                  />
+                  <div className="flex gap-2">
+                    <SelectDropdown
+                      defaultValue={field.value}
+                      onValueChange={field.onChange}
+                      placeholder={isLoadingStores ? '加载店铺列表中...' : '请选择店铺'}
+                      items={apiStores}
+                      className="flex-1"
+                      disabled={isLoadingStores}
+                    />
+                    {isLoadingStores && (
+                      <Loader2 className="h-10 w-10 animate-spin text-muted-foreground" />
+                    )}
+                  </div>
                   <FormMessage />
                 </FormItem>
               )}

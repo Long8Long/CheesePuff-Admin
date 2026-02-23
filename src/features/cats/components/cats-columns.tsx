@@ -181,19 +181,12 @@ export const catsColumns: ColumnDef<Cat>[] = [
     ),
     cell: ({ row }) => {
       const status = row.getValue('catcafeStatus') as Cat['catcafeStatus']
-      const statusLabel = {
-        working: '工作中',
-        resting: '休息中',
-        sick: '生病中',
-        retired: '已退休',
-        pregnant: '怀孕中',
-        nursing: '哺乳期',
-      }[status]
+      if (!status) return null
       const colorClass = statusColors.get(status)
 
       return (
         <Badge variant='outline' className={colorClass}>
-          {statusLabel}
+          {status}
         </Badge>
       )
     },

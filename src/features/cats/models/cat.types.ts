@@ -13,18 +13,18 @@
  * Cat cafe working status / 猫咖工作状态
  */
 export type CatCafeStatus =
-  | 'working'
-  | 'resting'
-  | 'sick'
-  | 'retired'
-  | 'pregnant'
-  | 'nursing'
-  | 'training'
+  | '工作中'
+  | '休息中'
+  | '生病中'
+  | '已退休'
+  | '怀孕中'
+  | '哺乳期'
+  | '训练中'
 
 /**
  * Store location / 门店位置
  */
-export type Store = '山东店' | '苏州店'
+export type Store = string
 
 /**
  * Cat entity / 猫咪实体

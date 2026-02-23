@@ -34,40 +34,40 @@ export const stores = [
 
 // 工作状态列表 / Work status list
 export const catCafeStatuses = [
-  { label: '工作中', value: 'working' },
-  { label: '休息中', value: 'resting' },
-  { label: '生病中', value: 'sick' },
-  { label: '已退休', value: 'retired' },
-  { label: '怀孕中', value: 'pregnant' },
-  { label: '哺乳期', value: 'nursing' },
-  { label: '训练中', value: 'training' },
+  { label: '工作中', value: '工作中' },
+  { label: '休息中', value: '休息中' },
+  { label: '生病中', value: '生病中' },
+  { label: '已退休', value: '已退休' },
+  { label: '怀孕中', value: '怀孕中' },
+  { label: '哺乳期', value: '哺乳期' },
+  { label: '训练中', value: '训练中' },
 ]
 
 // 状态颜色映射 / Status color mapping
 export const statusColors: Map<CatCafeStatus, string> = new Map([
   [
-    'working',
+    '工作中',
     'bg-teal-100/30 text-teal-900 dark:text-teal-200 border-teal-200',
   ],
   [
-    'resting',
+    '休息中',
     'bg-amber-100/30 text-amber-900 dark:text-amber-200 border-amber-200',
   ],
   [
-    'sick',
+    '生病中',
     'bg-destructive/10 dark:bg-destructive/50 text-destructive dark:text-primary border-destructive/10',
   ],
-  ['retired', 'bg-neutral-300/40 border-neutral-300'],
+  ['已退休', 'bg-neutral-300/40 border-neutral-300'],
   [
-    'pregnant',
+    '怀孕中',
     'bg-pink-100/30 text-pink-900 dark:text-pink-200 border-pink-200',
   ],
   [
-    'nursing',
+    '哺乳期',
     'bg-purple-100/30 text-purple-900 dark:text-purple-200 border-purple-200',
   ],
   [
-    'training',
+    '训练中',
     'bg-blue-100/30 text-blue-900 dark:text-blue-200 border-blue-200',
   ],
 ])
