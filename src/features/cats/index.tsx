@@ -1,7 +1,5 @@
-import { ConfigDrawer } from '@/components/config-drawer'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
-import { LangSwitch } from '@/components/lang-switch'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
@@ -17,8 +15,8 @@ export function Cats() {
         <Search />
         <div className='ms-auto flex items-center space-x-4'>
           <ThemeSwitch />
-          <LangSwitch />
-          <ConfigDrawer />
+          {/* <LangSwitch /> */}
+          {/* <ConfigDrawer /> */}
           <ProfileDropdown />
         </div>
       </Header>
