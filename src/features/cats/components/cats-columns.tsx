@@ -129,7 +129,7 @@ export const catsColumns: ColumnDef<Cat>[] = [
       i18nKey: 'dataTable.cats.columns.store',
     },
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='店铺' />
+      <DataTableColumnHeader column={column} title='门店' />
     ),
     cell: ({ row }) => {
       const store = row.getValue('store') as string

@@ -43,7 +43,8 @@
         "price": "价格",
         "catcafeStatus": "状态",
         "visible": "可见",
-        "actions": "操作"
+        "actions": "操作",
+        "store": "门店"
       }
     }
   }
