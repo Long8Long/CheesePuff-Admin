@@ -41,8 +41,6 @@ export function ConfigsTable() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
 
   const {
-    globalFilter,
-    onGlobalFilterChange,
     columnFilters,
     onColumnFiltersChange,
     pagination,
@@ -52,7 +50,7 @@ export function ConfigsTable() {
     search: route.useSearch(),
     navigate: route.useNavigate(),
     pagination: { defaultPage: 1, defaultPageSize: 10 },
-    globalFilter: { enabled: true, key: 'filter' },
+    globalFilter: { enabled: false },
     columnFilters: [],
   })
 
@@ -63,7 +61,7 @@ export function ConfigsTable() {
     refetch,
     isFetching,
   } = useQuery({
-    queryKey: ['configs', pagination.pageIndex + 1, pagination.pageSize, columnFilters, globalFilter],
+    queryKey: ['configs', pagination.pageIndex + 1, pagination.pageSize, columnFilters],
     queryFn: () =>
       configsService.getList({
         page: pagination.pageIndex + 1,
@@ -89,7 +87,6 @@ export function ConfigsTable() {
       columnVisibility,
       rowSelection,
       columnFilters,
-      globalFilter,
       pagination,
     },
     pageCount: Math.ceil(totalCount / pagination.pageSize),
@@ -97,16 +94,6 @@ export function ConfigsTable() {
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
     onColumnVisibilityChange: setColumnVisibility,
-    globalFilterFn: (row, _columnId, filterValue) => {
-      const key = String(row.getValue('key')).toLowerCase()
-      const description = String(row.getValue('description') ?? '').toLowerCase()
-      const searchValue = String(filterValue).toLowerCase()
-
-      return (
-        key.includes(searchValue) ||
-        description.includes(searchValue)
-      )
-    },
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -114,7 +101,6 @@ export function ConfigsTable() {
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
     onPaginationChange,
-    onGlobalFilterChange,
     onColumnFiltersChange,
   })
 
@@ -154,7 +140,8 @@ export function ConfigsTable() {
     >
       <DataTableToolbar
         table={table}
-        searchPlaceholder="搜索配置键、描述..."
+        showSearch={false}
+        showViewOptions={false}
         onRefresh={handleRefresh}
         isRefreshing={isFetching}
         filters={[]}

@@ -13,7 +13,6 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import {
   Form,
   FormControl,
@@ -25,6 +24,7 @@ import {
 import { configsService } from '../services/configs.service'
 import type { Config } from '../models/config.types'
 import { configFormSchema, type ConfigFormData } from '../data/config-schema'
+import { Plus, Trash2 } from 'lucide-react'
 
 interface ConfigsMutateDialogProps {
   currentRow: Config | null
@@ -38,36 +38,45 @@ export function ConfigsMutateDialog({
   onOpenChange,
 }: ConfigsMutateDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [items, setItems] = useState<string[]>([''])
   const queryClient = useQueryClient()
 
   const form = useForm<ConfigFormData>({
     resolver: zodResolver(configFormSchema),
     defaultValues: {
-      value: '',
+      value: [''],
       description: '',
     },
   })
 
+  const { handleSubmit, reset } = form
+
   useEffect(() => {
     if (currentRow && open) {
-      form.reset({
-        value: Array.isArray(currentRow.value)
-          ? currentRow.value.join('\n')
-          : String(currentRow.value),
+      const rawValue = currentRow.value
+      let valueArray: string[]
+
+      if (Array.isArray(rawValue)) {
+        valueArray = rawValue.length > 0 ? [...rawValue] : ['']
+      } else {
+        valueArray = [String(rawValue ?? '')]
+      }
+
+      setItems(valueArray)
+      reset({
+        value: valueArray,
         description: currentRow.description || '',
       })
     }
-  }, [currentRow, open, form])
+  }, [currentRow, open, reset])
 
   const onSubmit = async (data: ConfigFormData) => {
     if (!currentRow) return
 
     setIsSubmitting(true)
     try {
-      // Convert string value to array if it contains newlines
-      const processedValue = typeof data.value === 'string' && data.value.includes('\n')
-        ? data.value.split('\n').filter((v: string) => v.trim())
-        : data.value
+      // Filter out empty strings
+      const processedValue = items.filter((v) => v.trim())
 
       await configsService.update(currentRow.key, {
         value: processedValue,
@@ -77,6 +86,7 @@ export function ConfigsMutateDialog({
       toast.success('配置更新成功')
       onOpenChange(false)
       form.reset()
+      setItems([''])
 
       // Refetch configs list
       queryClient.invalidateQueries({ queryKey: ['configs'] })
@@ -87,31 +97,43 @@ export function ConfigsMutateDialog({
     }
   }
 
+  const handleAddItem = () => {
+    setItems([...items, ''])
+  }
+
+  const handleRemoveItem = (index: number) => {
+    if (items.length > 1) {
+      const newItems = items.filter((_, i) => i !== index)
+      setItems(newItems)
+    }
+  }
+
+  const handleItemChange = (index: number, value: string) => {
+    const newItems = [...items]
+    newItems[index] = value
+    setItems(newItems)
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[400px]">
         <DialogHeader>
           <DialogTitle>编辑配置</DialogTitle>
           <DialogDescription>
-            请每行输入一个值。
+            可以添加、删除或修改每个选项。
           </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
-              name="value"
+              name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>配置值</FormLabel>
+                  <FormLabel>描述</FormLabel>
                   <FormControl>
-                    <Textarea
-                      {...field}
-                      placeholder="每行输入一个配置项&#10;例如：&#10;豹猫妹妹&#10;纯白德文妹妹&#10;英短蓝猫"
-                      rows={6}
-                      className="font-mono text-sm"
-                    />
+                    <Input {...field} placeholder="请输入配置描述" className="max-w-[300px]" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -120,13 +142,49 @@ export function ConfigsMutateDialog({
 
             <FormField
               control={form.control}
-              name="description"
-              render={({ field }) => (
+              name="value"
+              render={() => (
                 <FormItem>
-                  <FormLabel>描述</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="请输入配置描述" />
-                  </FormControl>
+                  <div className="flex items-center justify-between">
+                    <FormLabel>选项</FormLabel>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleAddItem}
+                      className="h-8 gap-1"
+                    >
+                      <Plus className="h-3 w-3" />
+                      添加
+                    </Button>
+                  </div>
+                  <div className="space-y-2 max-h-[200px] overflow-y-auto">
+                    {items.map((item, index) => (
+                      <div key={index} className="flex items-center gap-2">
+                        <span className="text-muted-foreground text-sm w-6 shrink-0">
+                          {index + 1}.
+                        </span>
+                        <FormControl>
+                          <Input
+                            value={item}
+                            onChange={(e) => handleItemChange(index, e.target.value)}
+                            placeholder={`输入配置项 ${index + 1}`}
+                            className="font-mono text-sm"
+                          />
+                        </FormControl>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleRemoveItem(index)}
+                          disabled={items.length <= 1}
+                          className="shrink-0 h-8 w-8 text-muted-foreground hover:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
                   <FormMessage />
                 </FormItem>
               )}

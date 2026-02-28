@@ -1,13 +1,7 @@
 import { type ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/components/data-table'
 import { Button } from '@/components/ui/button'
-import { DotsHorizontalIcon } from '@radix-ui/react-icons'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+import { Pencil1Icon } from '@radix-ui/react-icons'
 import { type Config } from '../models/config.types'
 
 interface ConfigsColumnProps {
@@ -17,17 +11,16 @@ interface ConfigsColumnProps {
 export function getConfigsColumns({ onEdit }: ConfigsColumnProps): ColumnDef<Config>[] {
   return [
     {
-      accessorKey: 'key',
+      accessorKey: 'description',
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="配置键" />
+        <DataTableColumnHeader column={column} title="描述" />
       ),
       cell: ({ row }) => (
-        <div className="max-w-[200px] truncate font-medium">
-          {row.getValue('key')}
+        <div className="max-w-[400px] truncate">
+          {row.getValue('description') || '-'}
         </div>
       ),
-      enableSorting: true,
-      enableHiding: false,
+      enableSorting: false,
     },
     {
       accessorKey: 'value',
@@ -49,40 +42,21 @@ export function getConfigsColumns({ onEdit }: ConfigsColumnProps): ColumnDef<Con
       enableSorting: false,
     },
     {
-      accessorKey: 'description',
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="描述" />
-      ),
-      cell: ({ row }) => (
-        <div className="max-w-[400px] truncate">
-          {row.getValue('description') || '-'}
-        </div>
-      ),
-      enableSorting: false,
-    },
-    {
       id: 'actions',
       header: '操作',
       cell: ({ row }) => {
         const config = row.original
 
         return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                className="flex h-8 w-8 p-0 data-[state=open]:bg-muted"
-              >
-                <DotsHorizontalIcon className="h-4 w-4" />
-                <span className="sr-only">打开菜单</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => onEdit(config)}>
-                编辑
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 gap-1"
+            onClick={() => onEdit(config)}
+          >
+            <Pencil1Icon className="h-3 w-3" />
+            编辑
+          </Button>
         )
       },
     },
