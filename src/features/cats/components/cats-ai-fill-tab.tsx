@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Loader2, Clipboard, Wand2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
-import { parseCatInfoWithAI } from '@/lib/zhipu-ai'
+import { useAIFormFill } from '@/hooks/use-ai-form-fill'
 import type { CatAIOutput } from '../data/ai-schema'
 
 interface CatsAIFillTabProps {
@@ -11,25 +11,21 @@ interface CatsAIFillTabProps {
 
 export function CatsAIFillTab({ onAIFill }: CatsAIFillTabProps) {
   const [text, setText] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const { fill, loading, error } = useAIFormFill()
 
   const handleAIFill = async () => {
     if (!text.trim()) {
-      setError('请输入猫咪的描述信息')
       return
     }
 
-    setIsLoading(true)
-    setError(null)
-
     try {
-      const result = await parseCatInfoWithAI({ text })
+      // 调用后端 API 获取 AI 填充结果
+      // 拦截器会自动将 snake_case 转换为 camelCase
+      const result = await fill('cats', text) as unknown as CatAIOutput
+
       onAIFill(result)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'AI 填充失败，请重试')
-    } finally {
-      setIsLoading(false)
+    } catch {
+      // Error is handled by the hook
     }
   }
 
@@ -38,7 +34,7 @@ export function CatsAIFillTab({ onAIFill }: CatsAIFillTabProps) {
       const clipboardText = await navigator.clipboard.readText()
       setText(clipboardText)
     } catch {
-      setError('无法访问剪贴板，请手动粘贴')
+      // Silently fail - user can manually paste
     }
   }
 
@@ -59,7 +55,7 @@ export function CatsAIFillTab({ onAIFill }: CatsAIFillTabProps) {
           placeholder="猫咪的名称、品种、年龄、价格、性格等信息..."
           rows={5}
           className="resize-none"
-          disabled={isLoading}
+          disabled={loading}
         />
       </div>
 
@@ -77,7 +73,7 @@ export function CatsAIFillTab({ onAIFill }: CatsAIFillTabProps) {
           variant="outline"
           size="sm"
           onClick={handlePaste}
-          disabled={isLoading}
+          disabled={loading}
         >
           <Clipboard className="mr-2 h-4 w-4" />
           从剪贴板粘贴
@@ -85,9 +81,9 @@ export function CatsAIFillTab({ onAIFill }: CatsAIFillTabProps) {
         <Button
           type="button"
           onClick={handleAIFill}
-          disabled={isLoading || !text.trim()}
+          disabled={loading || !text.trim()}
         >
-          {isLoading ? (
+          {loading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               AI 正在解析...
