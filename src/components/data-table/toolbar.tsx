@@ -10,6 +10,7 @@ type DataTableToolbarProps<TData> = {
   searchPlaceholder?: string
   searchKey?: string
   showSearch?: boolean
+  showViewOptions?: boolean
   filters?: {
     columnId: string
     title: string
@@ -28,6 +29,7 @@ export function DataTableToolbar<TData>({
   searchPlaceholder = 'Filter...',
   searchKey,
   showSearch = true,
+  showViewOptions = true,
   filters = [],
   onRefresh,
   isRefreshing = false,
@@ -108,7 +110,7 @@ export function DataTableToolbar<TData>({
             刷新
           </Button>
         )}
-        <DataTableViewOptions table={table} />
+        {showViewOptions && <DataTableViewOptions table={table} />}
       </div>
     </div>
   )
