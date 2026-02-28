@@ -15,9 +15,5 @@
   - Key parameters: handleServerError(error)
 - `api.ts`
   - Core function: Axios HTTP client with interceptors for auth and camelCase/snake_case conversion;
-  - Technical details: Auto-adds Authorization header from cookie, uses humps library for case conversion, handles 401 redirects;
+  - Technical details: Auto-adds Authorization header from cookie, uses humps library for case conversion (snake_case → camelCase in response, camelCase → snake_case in request), handles 401 redirects;
   - Key parameters: baseURL (env var), timeout (30000ms), request interceptor (adds token, converts to snake_case), response interceptor (converts to camelCase)
-- `zhipu-ai.ts`
-  - Core function: Integration with Zhipu AI service for AI chat completions and image generation;
-  - Technical details: Custom API wrapper for Zhipu AI services;
-  - Key parameters: chat completions, image generation/analysis

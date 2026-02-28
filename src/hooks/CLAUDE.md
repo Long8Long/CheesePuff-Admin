@@ -13,3 +13,7 @@
   - Core function: Detects if current viewport is mobile-sized for responsive layouts;
   - Technical details: Uses window.matchMedia with 768px breakpoint, SSR-safe (returns undefined during SSR), reactive to window resize;
   - Key parameters: isMobile (boolean)
+- `use-ai-form-fill.ts`
+  - Core function: Hook for AI form filling functionality, calls backend API at /api/v1/ai/form/fill;
+  - Technical details: Uses the common API client (axios), automatic snake_case to camelCase conversion via interceptor;
+  - Key parameters: fill(formType, text), loading, error
