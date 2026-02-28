@@ -124,7 +124,7 @@ export const catsColumns: ColumnDef<Cat>[] = [
     },
   },
   {
-    accessorKey: 'store',
+    accessorKey: 'storeName',
     meta: {
       i18nKey: 'dataTable.cats.columns.store',
     },
@@ -132,8 +132,8 @@ export const catsColumns: ColumnDef<Cat>[] = [
       <DataTableColumnHeader column={column} title='门店' />
     ),
     cell: ({ row }) => {
-      const store = row.getValue('store') as string
-      return <span className='font-medium'>{store}</span>
+      const storeName = row.getValue('storeName') as string
+      return <span className='font-medium'>{storeName}</span>
     },
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id))

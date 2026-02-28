@@ -70,7 +70,7 @@ function generateCat(id: number): Cat {
     id: idStr,
     name: faker.helpers.arrayElement(catNames),
     breed,
-    store: faker.helpers.arrayElement(stores).value,
+    storeName: faker.helpers.arrayElement(stores).value,
     birthday,
     price,
     images,

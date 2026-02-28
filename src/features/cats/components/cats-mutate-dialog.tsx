@@ -47,7 +47,7 @@ type CatMutateDialogProps = {
 const formSchema = z.object({
   name: z.string().optional(),
   breed: z.string().min(1, '请选择品种'),
-  store: z.string().optional(),
+  storeName: z.string().optional(),
   birthday: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, '日期格式错误'),
   price: z.string().optional(),
   image: z.string().optional(),
@@ -152,7 +152,7 @@ export function CatsMutateDialog({
       ? {
           name: currentRow.name ?? '',
           breed: currentRow.breed,
-          store: currentRow.store ?? undefined,
+          storeName: currentRow.storeName ?? undefined,
           birthday: currentRow.birthday ?? undefined,
           price: String(currentRow.price ?? ''),
           image: currentRow.images?.[0] ?? '',
@@ -163,7 +163,7 @@ export function CatsMutateDialog({
       : {
           name: '',
           breed: '',
-          store: defaultStore || undefined,
+          storeName: defaultStore || undefined,
           birthday: getTodayString(),
           price: '',
           image: '',
@@ -187,7 +187,7 @@ export function CatsMutateDialog({
       const requestData: CatCreate | CatUpdate = {
         name: emptyStringToNull(data.name),
         breed: data.breed,
-        store: emptyStringToNull(data.store),
+        storeName: emptyStringToNull(data.storeName),
         birthday: data.birthday,
         price: data.price ? Number.parseFloat(data.price) : null,
         images: data.image ? [data.image] : null,
@@ -234,9 +234,9 @@ export function CatsMutateDialog({
       form.setValue('breed', data.breed)
       newAiFilledFields.add('breed')
     }
-    if (data.store) {
-      form.setValue('store', data.store)
-      newAiFilledFields.add('store')
+    if (data.storeName) {
+      form.setValue('storeName', data.storeName)
+      newAiFilledFields.add('storeName')
     }
     if (data.birthday) {
       form.setValue('birthday', data.birthday)
@@ -254,7 +254,7 @@ export function CatsMutateDialog({
       form.setValue('catcafeStatus', data.catcafeStatus)
       newAiFilledFields.add('catcafeStatus')
     }
-    if (data.visible !== undefined) {
+    if (data.visible !== undefined && data.visible !== null) {
       form.setValue('visible', data.visible)
       newAiFilledFields.add('visible')
     }
@@ -481,7 +481,7 @@ function FormWrapper({
             />
             <FormField
               control={form.control}
-              name="store"
+              name="storeName"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>店铺</FormLabel>

@@ -36,7 +36,7 @@ export interface Cat {
   id: string
   name: string | null | undefined
   breed: string
-  store: Store | null
+  storeName: Store | null
   birthday: string | null
   price: number | null
   images: string[] | null

@@ -32,7 +32,7 @@ export interface GetCatsListParams {
  * Data for creating a new cat / 创建新猫咪的数据
  * All fields optional except required ones, with null support
  */
-export type CatCreate = Partial<NullableFields<Pick<CatMutableFields, 'name' | 'price' | 'description' | 'catcafeStatus' | 'images' | 'thumbnail' | 'store'>>> &
+export type CatCreate = Partial<NullableFields<Pick<CatMutableFields, 'name' | 'price' | 'description' | 'catcafeStatus' | 'images' | 'thumbnail' | 'storeName'>>> &
   Pick<CatMutableFields, 'breed' | 'birthday'>
 
 /**
