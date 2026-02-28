@@ -116,7 +116,7 @@ src/
 - ✅ 批量操作 (批量删除)
 - ✅ 品种管理 (动态添加)
 - ✅ 多门店支持 (山东店、苏州店)
-- ✅ 照片上传 (单图)
+- ✅ 照片上传 (多图最多5张)
 - ✅ 状态管理 (工作中、休息、生病等)
 
 **技术实现**:
@@ -128,6 +128,7 @@ src/
 | 数据表格 | 自定义 DataTable 组件 | `src/components/data-table/` |
 | URL 状态同步 | use-table-url-state Hook | `src/hooks/use-table-url-state.tsx` |
 | AI 解析 | 后端 API + useAIFormFill Hook | `src/hooks/use-ai-form-fill.ts` |
+| 图片上传 | 后端 API + uploadService | `src/features/cats/services/uploads.service.ts` |
 
 ### 3.2 认证模块 (Authentication)
 
@@ -167,6 +168,7 @@ src/
 // 请求拦截器
 - 自动添加 Authorization header (从 Cookie 读取 access_token)
 - 请求参数 camelCase → snake_case 转换
+- 跳过 FormData 对象的转换 (multipart/form-data 请求)
 
 // 响应拦截器
 - 响应数据 snake_case → camelCase 转换
@@ -185,6 +187,7 @@ POST   /api/v1/admin/cats           // 创建
 PUT    /api/v1/admin/cats/:id       // 更新
 DELETE /api/v1/admin/cats/:id       // 删除
 DELETE /api/v1/admin/cats/bulk      // 批量删除
+POST   /api/v1/admin/uploads/batch // 批量上传图片 (multipart/form-data)
 ```
 
 ---

@@ -19,7 +19,8 @@ api.interceptors.request.use(
     }
 
     // Convert request data from camelCase to snake_case
-    if (config.data && typeof config.data === 'object') {
+    // Skip transformation for FormData (multipart/form-data requests)
+    if (config.data && typeof config.data === 'object' && !(config.data instanceof FormData)) {
       config.data = humps.decamelizeKeys(config.data, {
         // Don't convert keys that are all uppercase (like IDs)
         process: (key: string) => {

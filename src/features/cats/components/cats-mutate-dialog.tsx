@@ -32,6 +32,7 @@ import { SelectDropdown } from '@/components/select-dropdown'
 import type { Cat, CatCreate, CatUpdate } from '../models'
 import type { CatAIOutput } from '../data/ai-schema'
 import { catsService } from '../services/cats.service'
+import { uploadService } from '../services/uploads.service'
 import { CatsAIFillTab } from './cats-ai-fill-tab'
 import { BreedDialog } from './breed-dialog'
 import { configsService } from '@/features/settings/cattery-config/services/configs.service'
@@ -50,7 +51,7 @@ const formSchema = z.object({
   storeName: z.string().optional(),
   birthday: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, '日期格式错误'),
   price: z.string().optional(),
-  image: z.string().optional(),
+  images: z.array(z.string()).optional(),
   description: z.string().optional(),
   catcafeStatus: z.string().optional(),
   visible: z.boolean().optional(),
@@ -155,7 +156,7 @@ export function CatsMutateDialog({
           storeName: currentRow.storeName ?? undefined,
           birthday: currentRow.birthday ?? undefined,
           price: String(currentRow.price ?? ''),
-          image: currentRow.images?.[0] ?? '',
+          images: currentRow.images ?? [],
           description: currentRow.description ?? '',
           catcafeStatus: currentRow.catcafeStatus ?? undefined,
           visible: currentRow.visible,
@@ -166,7 +167,7 @@ export function CatsMutateDialog({
           storeName: defaultStore || undefined,
           birthday: getTodayString(),
           price: '',
-          image: '',
+          images: [],
           description: '',
           catcafeStatus: defaultStatus || undefined,
           visible: true,
@@ -190,8 +191,8 @@ export function CatsMutateDialog({
         storeName: emptyStringToNull(data.storeName),
         birthday: data.birthday,
         price: data.price ? Number.parseFloat(data.price) : null,
-        images: data.image ? [data.image] : null,
-        thumbnail: emptyStringToNull(data.image),
+        images: data.images && data.images.length > 0 ? data.images : null,
+        thumbnail: data.images && data.images.length > 0 ? data.images[0] : null,
         description: emptyStringToNull(data.description),
         catcafeStatus: emptyStringToNull<Cat['catcafeStatus']>(data.catcafeStatus),
         visible: data.visible ?? true,
@@ -585,7 +586,7 @@ function FormWrapper({
 
           <FormField
             control={form.control}
-            name="image"
+            name="images"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>图片</FormLabel>
@@ -593,9 +594,18 @@ function FormWrapper({
                   <ImageUpload
                     value={field.value}
                     onChange={field.onChange}
+                    maxCount={5}
+                    uploadFn={async (files) => {
+                      const results = await uploadService.uploadCatImages(files)
+                      return results
+                        .filter((r) => r.success && r.originalUrl)
+                        .map((r) => ({
+                          url: r.originalUrl as string,
+                          thumbnailUrl: r.thumbnailUrl || r.originalUrl || '',
+                        }))
+                    }}
                   />
                 </FormControl>
-                <FormDescription>可选：上传一张猫咪图片</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
