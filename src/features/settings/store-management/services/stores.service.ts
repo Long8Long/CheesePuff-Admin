@@ -21,7 +21,7 @@ export const storesService = {
     return responseData
   },
   update: async (id: string, data: StoreUpdate): Promise<StoreType> => {
-    const { data: responseData } = await api.put<StoreType>(`/api/v1/admin/stores/${id}`, data)
+    const { data: responseData } = await api.patch<StoreType>(`/api/v1/admin/stores/${id}`, data)
     return responseData
   },
   delete: async (id: string): Promise<void> => {
