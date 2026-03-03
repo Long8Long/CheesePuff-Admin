@@ -16,9 +16,9 @@ export const Route = createFileRoute('/_authenticated')({
     // Initialize user info if not already loaded
     if (!auth.user) {
       try {
-        const response = await authService.getCurrentUser()
-        if (response.code === 200 && response.data) {
-          useAuthStore.getState().auth.setUser(response.data)
+        const user = await authService.getCurrentUser()
+        if (user) {
+          useAuthStore.getState().auth.setUser(user)
         }
       } catch {
         // If get current user fails, clear token and redirect to login

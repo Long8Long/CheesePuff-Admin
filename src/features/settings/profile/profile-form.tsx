@@ -2,8 +2,10 @@ import { z } from 'zod'
 import { useFieldArray, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { useAuthStore } from '@/stores/auth-store'
 import { showSubmittedData } from '@/lib/show-submitted-data'
+import { authService } from '@/features/auth/services/auth.service'
 import {
   Form,
   FormControl,
@@ -47,7 +49,20 @@ const defaultValues: Partial<ProfileFormValues> = {
 }
 
 export function ProfileForm() {
-  const { user } = useAuthStore((state) => state.auth)
+  const { user, setUser } = useAuthStore((state) => state.auth)
+
+  // Fetch current user data
+  const { data: currentUser, isLoading } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: () => authService.getCurrentUser(),
+  })
+
+  // Update auth store when user data is fetched
+  useEffect(() => {
+    if (currentUser) {
+      setUser(currentUser)
+    }
+  }, [currentUser, setUser])
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -55,18 +70,27 @@ export function ProfileForm() {
     mode: 'onChange',
   })
 
-  // Pre-fill form with user data from auth store
+  // Pre-fill form with user data from auth store or API response
   useEffect(() => {
-    if (user) {
-      form.setValue('username', user.username)
-      form.setValue('email', user.email)
+    const userData = user || currentUser
+    if (userData) {
+      form.setValue('username', userData.username)
+      form.setValue('email', userData.email)
     }
-  }, [user, form])
+  }, [user, currentUser, form])
 
   useFieldArray({
     name: 'urls',
     control: form.control,
   })
+
+  if (isLoading) {
+    return (
+      <div className='flex items-center justify-center h-64'>
+        <p className='text-muted-foreground'>加载中...</p>
+      </div>
+    )
+  }
 
   return (
     <Form {...form}>

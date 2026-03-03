@@ -63,11 +63,11 @@ export function UserAuthForm({
         auth.setAccessToken(responseData.accessToken)
 
         // Step 3: Fetch current user info with the access token
-        const meResponse = await authService.getCurrentUser()
+        const meData = await authService.getCurrentUser()
 
-        if (meResponse.code === 200 && meResponse.data) {
+        if (meData) {
           // Step 4: Set user from /me endpoint (includes all user fields)
-          auth.setUser(meResponse.data)
+          auth.setUser(meData)
           toast.success('登录成功！')
         } else {
           // Fallback to login response user data if /me fails

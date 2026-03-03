@@ -10,8 +10,8 @@ import type {
   LoginRequest,
   LoginResponse,
   LogoutResponse,
-  CurrentUserResponse,
 } from '../models'
+import type { User } from '@/features/auth/models'
 
 /**
  * Auth Service / 认证服务
@@ -42,8 +42,8 @@ export const authService = {
    * Get current user info / 获取当前用户信息
    * GET /api/v1/admin/auth/me
    */
-  getCurrentUser: async (): Promise<CurrentUserResponse> => {
-    const response = await api.get('/api/v1/admin/auth/me')
-    return response.data
+  getCurrentUser: async (): Promise<User> => {
+    const { data } = await api.get<User>('/api/v1/admin/auth/me')
+    return data
   },
 }
