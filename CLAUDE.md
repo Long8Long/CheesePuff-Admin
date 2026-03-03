@@ -148,10 +148,18 @@ features/[feature-name]/
 ### Authentication & Error Handling
 
 - **Auth State**: Zustand (`stores/auth-store.ts`) + Cookie persistence
+- **API Interceptor**: Automatic response unwrapping in `src/lib/api.ts`
+  - Backend returns `{ code, message, data }` format
+  - Interceptor automatically unwraps to return `data` directly
+  - Service methods should use direct types, not wrapped response types
+  - Example: `api.get<User>()` returns `User`, not `ApiResponse<User>`
 - **Error Handling**:
   - 401: Redirect to sign-in page (with redirect URL)
-  - 500: Navigate to /500 page in production
-  - 304: Show "Content not modified" message
+  - 403: Show "权限不足" toast
+  - 404: Show "资源不存在" toast
+  - 500: Show "服务器内部错误" toast
+  - Network errors: Show "网络连接失败" toast
+  - Business errors (non-200 codes): Show backend `message` toast
 
 ### Shadcn UI Component Update Notes
 
@@ -170,6 +178,17 @@ features/[feature-name]/
 - `utils.ts`: `cn()` style merging, `getPageNumbers()` pagination generation
 - `cookies.ts`: Cookie operations (replaces js-cookie)
 - `handle-server-error.ts`: Unified error handling
+
+### API Service Layer
+
+**Important**: See [docs/API-SERVICE-PATTERNS.md](docs/API-SERVICE-PATTERNS.md) for detailed API service patterns and best practices.
+
+Key points:
+- Response interceptor automatically unwraps `{ code, message, data }` format
+- Use direct types in service methods (not wrapped `ApiResponse<T>`)
+- Use `PATCH` for updates (not `PUT`)
+- Use `const { data } = await api.get<Type>()` for queries
+- Use `const { data: responseData }` when parameter name conflicts occur
 
 ## Docker Deployment
 

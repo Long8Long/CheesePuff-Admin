@@ -47,6 +47,12 @@ CheesePuff Admin 是一个功能完整的猫舍管理系统，支持：
 
 ### ✅ 已实现功能
 
+- **用户认证**
+  - JWT 认证系统
+  - 登录/登出功能
+  - 自动 token 刷新
+  - 个人信息管理
+
 - **猫咪管理**
   - 完整的 CRUD 操作
   - AI 智能填充（品种、描述、价格等）
@@ -54,15 +60,17 @@ CheesePuff Admin 是一个功能完整的猫舍管理系统，支持：
   - 高级筛选（品种、状态、门店）
   - 分页和排序
   - URL 状态同步（支持分享链接）
+  - 批量图片上传
 
 - **门店管理**
   - 动态门店配置
   - 门店启用/禁用
   - 多门店数据隔离
+  - 操作后自动刷新
 
 - **系统配置**
-  - 品种管理
-  - 状态管理
+  - 品种管理（CRUD）
+  - 状态管理（CRUD）
   - 个性化设置
 
 - **UI/UX**
@@ -71,6 +79,11 @@ CheesePuff Admin 是一个功能完整的猫舍管理系统，支持：
   - 全局搜索命令
   - Toast 通知
   - 确认对话框
+
+- **API 层**
+  - 统一响应拦截器（自动解包）
+  - 统一错误处理（HTTP 状态码 + 业务错误码）
+  - Toast 提示集成
 
 ### 🚧 计划功能
 
@@ -210,6 +223,32 @@ VITE_API_BASE_URL=https://api.example.com
 - 状态管理优先使用 Zustand
 - 表单验证使用 Zod schema
 - 禁止使用 `console.log`（使用 toast 通知替代）
+- **API 调用规范**：
+  - Service 层使用拦截器自动解包响应
+  - 更新操作使用 `PATCH` 方法（而非 `PUT`）
+  - 创建/更新后自动刷新列表数据
+
+详细的 API Service 模式和最佳实践，请参考 [API-SERVICE-PATTERNS.md](docs/API-SERVICE-PATTERNS.md)
+
+## API 架构
+
+### 响应拦截器
+
+后端统一返回格式：
+```json
+{
+  "code": 200,
+  "message": "success",
+  "data": { ... }
+}
+```
+
+前端拦截器在 `src/lib/api.ts` 中自动解包：
+- 业务成功（code: 200/0/201/204）→ 返回 `data` 部分
+- 业务错误（其他 code）→ 显示 toast 并 reject
+- HTTP 错误（401/403/404/500）→ 统一错误提示
+
+**详细文档**: [API-SERVICE-PATTERNS.md](docs/API-SERVICE-PATTERNS.md) 包含完整的 Service 层示例代码和最佳实践。
 
 ## 浏览器支持
 
