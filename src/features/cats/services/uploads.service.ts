@@ -24,12 +24,6 @@ export interface BatchUploadResponse {
   files: UploadFile[]
 }
 
-interface ApiResponse<T> {
-  code: number
-  message: string
-  data: T
-}
-
 // ============================================
 // Upload Service / 上传服务
 // ============================================
@@ -50,7 +44,7 @@ export const uploadService = {
     files.forEach((file) => formData.append('files', file))
     formData.append('upload_type', 'cat_image')
 
-    const response = await api.post<ApiResponse<BatchUploadResponse>>(
+    const { data } = await api.post<BatchUploadResponse>(
       '/api/v1/admin/uploads/batch',
       formData,
       {
@@ -60,6 +54,6 @@ export const uploadService = {
       }
     )
 
-    return response.data.data.files
+    return data.files
   },
 }

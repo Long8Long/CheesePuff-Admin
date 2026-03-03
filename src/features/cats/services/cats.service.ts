@@ -11,7 +11,6 @@ import type {
   CatCreate,
   CatUpdate,
   PaginatedResponse,
-  ApiResponse,
   Cat,
 } from '@/features/cats/models'
 
@@ -30,11 +29,11 @@ export const catsService = {
   getList: async (
     params: GetCatsListParams
   ): Promise<PaginatedResponse<Cat>> => {
-    const response = await api.get<ApiResponse<PaginatedResponse<Cat>>>(
+    const { data } = await api.get<PaginatedResponse<Cat>>(
       '/api/v1/admin/cats',
       { params }
     )
-    return response.data.data
+    return data
   },
 
   /**
@@ -42,8 +41,8 @@ export const catsService = {
    * GET /api/v1/admin/cats/:id
    */
   getById: async (id: string): Promise<Cat> => {
-    const response = await api.get<ApiResponse<Cat>>(`/api/v1/admin/cats/${id}`)
-    return response.data.data
+    const { data } = await api.get<Cat>(`/api/v1/admin/cats/${id}`)
+    return data
   },
 
   /**
@@ -51,11 +50,11 @@ export const catsService = {
    * POST /api/v1/admin/cats
    */
   create: async (data: CatCreate): Promise<Cat> => {
-    const response = await api.post<ApiResponse<Cat>>(
+    const { data: responseData } = await api.post<Cat>(
       '/api/v1/admin/cats',
       data
     )
-    return response.data.data
+    return responseData
   },
 
   /**
@@ -63,11 +62,11 @@ export const catsService = {
    * PUT /api/v1/admin/cats/:id
    */
   update: async (id: string, data: CatUpdate): Promise<Cat> => {
-    const response = await api.put<ApiResponse<Cat>>(
+    const { data: responseData } = await api.patch<Cat>(
       `/api/v1/admin/cats/${id}`,
       data
     )
-    return response.data.data
+    return responseData
   },
 
   /**

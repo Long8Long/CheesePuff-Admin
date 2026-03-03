@@ -54,15 +54,6 @@ export interface PaginatedResponse<T> {
   }
 }
 
-/**
- * API response wrapper / API 响应包装器
- */
-export interface ApiResponse<T> {
-  data: T
-  code?: number
-  message?: string
-}
-
 // ============================================
 // Utility Types / 工具类型
 // ============================================

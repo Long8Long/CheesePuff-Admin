@@ -111,8 +111,7 @@ export function CatsMutateDialog({
             value: store.name,
           }))
         setApiStores(stores)
-      } catch (error) {
-        console.error('Failed to fetch cat config data:', error)
+      } catch {
         toast.error('获取配置数据失败')
       } finally {
         setIsLoadingBreeds(false)
