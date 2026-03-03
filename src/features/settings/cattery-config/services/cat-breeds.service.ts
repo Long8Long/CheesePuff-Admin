@@ -12,7 +12,7 @@ export const catBreedsService = {
     return responseData
   },
   update: async (id: string, data: CatBreedUpdate): Promise<CatBreed> => {
-    const { data: responseData } = await api.put<CatBreed>(`/api/v1/admin/cat-breeds/${id}`, data)
+    const { data: responseData } = await api.patch<CatBreed>(`/api/v1/admin/cat-breeds/${id}`, data)
     return responseData
   },
   delete: async (id: string): Promise<void> => {
