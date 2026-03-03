@@ -4,6 +4,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { ConfirmDialog } from '@/components/confirm-dialog'
 import type { Store } from '../models/store.types'
 import { storesService } from '../services/stores.service'
+import { useStores } from './stores-provider'
 
 type StoreDeleteDialogProps = {
   open: boolean
@@ -16,11 +17,14 @@ export function StoresDeleteDialog({
   onOpenChange,
   currentRow,
 }: StoreDeleteDialogProps) {
+  const { refetch } = useStores()
+
   const handleDelete = async () => {
     if (!currentRow) return
 
     try {
       await storesService.delete(currentRow.id)
+      refetch()
       onOpenChange(false)
       toast.success(`已删除门店: ${currentRow.name}`)
     } catch (error) {

@@ -11,6 +11,8 @@ type StoresContextType = {
   setOpen: (str: StoresDialogType | null) => void
   currentRow: Store | null
   setCurrentRow: React.Dispatch<React.SetStateAction<Store | null>>
+  refetch: () => void
+  setRefetch: React.Dispatch<React.SetStateAction<() => void>>
 }
 
 const StoresContext = React.createContext<StoresContextType | null>(null)
@@ -22,9 +24,10 @@ export function StoresProvider({
 }) {
   const [open, setOpen] = useDialogState<StoresDialogType>(null)
   const [currentRow, setCurrentRow] = React.useState<Store | null>(null)
+  const [refetch, setRefetch] = React.useState<() => void>(() => () => {})
 
   return (
-    <StoresContext value={{ open, setOpen, currentRow, setCurrentRow }}>
+    <StoresContext value={{ open, setOpen, currentRow, setCurrentRow, refetch, setRefetch }}>
       {children}
     </StoresContext>
   )

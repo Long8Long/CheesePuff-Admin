@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/tooltip'
 import { DataTableBulkActions as BulkActionsToolbar } from '@/components/data-table'
 import { storesService } from '../services/stores.service'
+import { useStores } from './stores-provider'
 
 type DataTableBulkActionsProps = {
   table: Table<Store>
@@ -18,6 +19,7 @@ type DataTableBulkActionsProps = {
 export function DataTableBulkActions({
   table,
 }: DataTableBulkActionsProps) {
+  const { refetch } = useStores()
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const selectedRows = table.getFilteredSelectedRowModel().rows
 
@@ -25,6 +27,7 @@ export function DataTableBulkActions({
     const ids = selectedRows.map((row) => row.original.id)
     try {
       await storesService.bulkDelete(ids)
+      refetch()
       setShowDeleteConfirm(false)
       table.resetRowSelection()
       toast.success(`已删除 ${ids.length} 个门店`)

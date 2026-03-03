@@ -25,6 +25,7 @@ import { storeFormSchema, type StoreFormData } from '../data/store-schema'
 import type { Store } from '../models/store.types'
 import type { StoreCreate, StoreUpdate } from '../models/store-api.types'
 import { storesService } from '../services/stores.service'
+import { useStores } from './stores-provider'
 
 type StoreMutateDialogProps = {
   open: boolean
@@ -37,6 +38,7 @@ export function StoresMutateDialog({
   onOpenChange,
   currentRow,
 }: StoreMutateDialogProps) {
+  const { refetch } = useStores()
   const isUpdate = !!currentRow
 
   const form = useForm<StoreFormData>({
@@ -80,6 +82,7 @@ export function StoresMutateDialog({
         toast.success('门店创建成功')
       }
 
+      refetch()
       onOpenChange(false)
       form.reset()
     } catch (error) {

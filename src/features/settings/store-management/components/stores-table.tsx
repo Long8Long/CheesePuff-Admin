@@ -18,6 +18,7 @@ import {
 import { cn } from '@/lib/utils'
 import { useTableUrlState } from '@/hooks/use-table-url-state'
 import { storesService } from '../services/stores.service'
+import { useStores } from './stores-provider'
 import {
   Table,
   TableBody,
@@ -38,6 +39,7 @@ const storeTypeOptions = [
 ]
 
 export function StoresTable() {
+  const { setRefetch } = useStores()
   const [rowSelection, setRowSelection] = useState({})
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
@@ -74,6 +76,11 @@ export function StoresTable() {
         pageSize: pagination.pageSize,
       }),
   })
+
+  // Update refetch in context when it changes
+  useEffect(() => {
+    setRefetch(() => refetch)
+  }, [refetch, setRefetch])
 
   const data = response?.stores ?? []
   const totalCount = response?.pagination?.total ?? 0
