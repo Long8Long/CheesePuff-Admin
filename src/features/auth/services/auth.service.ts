@@ -8,7 +8,7 @@
 import api from '@/lib/api'
 import type {
   LoginRequest,
-  LoginResponse,
+  LoginResponseData,
   LogoutResponse,
 } from '../models'
 import type { User } from '@/features/auth/models'
@@ -20,9 +20,13 @@ export const authService = {
   /**
    * User login / 用户登录
    * POST /api/v1/admin/auth/login
+   *
+   * Note: Returns LoginResponseData directly because the API interceptor
+   * automatically unwraps the { code, message, data } response format.
+   * 返回已解包的 LoginResponseData，因为拦截器会自动解包 { code, message, data } 格式
    */
-  login: async (data: LoginRequest): Promise<LoginResponse> => {
-    const response = await api.post<LoginResponse>(
+  login: async (data: LoginRequest): Promise<LoginResponseData> => {
+    const response = await api.post<LoginResponseData>(
       '/api/v1/admin/auth/login',
       data
     )

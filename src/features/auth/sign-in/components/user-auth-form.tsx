@@ -51,36 +51,34 @@ export function UserAuthForm({
 
     try {
       // Step 1: Call auth service to login and get access token
+      // Note: loginResponse is already unwrapped by API interceptor
+      // loginResponse = { accessToken, expiresIn, user }
       const loginResponse = await authService.login({
         username: data.username,
         password: data.password,
       })
 
-      const { code, message, data: responseData } = loginResponse
+      const { accessToken, user } = loginResponse
 
-      if (code === 200 && responseData) {
-        // Step 2: Set access token first (required for getCurrentUser call)
-        auth.setAccessToken(responseData.accessToken)
+      // Step 2: Set access token first (required for getCurrentUser call)
+      auth.setAccessToken(accessToken)
 
-        // Step 3: Fetch current user info with the access token
-        const meData = await authService.getCurrentUser()
+      // Step 3: Fetch current user info with the access token
+      const meData = await authService.getCurrentUser()
 
-        if (meData) {
-          // Step 4: Set user from /me endpoint (includes all user fields)
-          auth.setUser(meData)
-          toast.success('登录成功！')
-        } else {
-          // Fallback to login response user data if /me fails
-          auth.setUser(responseData.user)
-          toast.success('登录成功！')
-        }
-
-        // Step 5: Redirect to cats page or the stored location
-        const targetPath = redirectTo || '/cats'
-        await navigate({ to: targetPath, replace: true })
+      if (meData) {
+        // Step 4: Set user from /me endpoint (includes all user fields)
+        auth.setUser(meData)
+        toast.success('登录成功！')
       } else {
-        toast.error(message || '登录失败')
+        // Fallback to login response user data if /me fails
+        auth.setUser(user)
+        toast.success('登录成功！')
       }
+
+      // Step 5: Redirect to cats page or the stored location
+      const targetPath = redirectTo || '/cats'
+      await navigate({ to: targetPath, replace: true })
     } catch (error: unknown) {
       const errorMessage =
         (error as { message?: string })?.message ||
