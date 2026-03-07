@@ -550,7 +550,7 @@ function FormWrapper({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    工作状态
+                    工作状态（猫咖）
                     {aiFilledFields.has('catcafeStatus') && <Badge />}
                   </FormLabel>
                   <div className="flex gap-2">
@@ -571,13 +571,13 @@ function FormWrapper({
               )}
             />
             <div className="space-y-3">
-              <FormLabel>是否可见</FormLabel>
+              <FormLabel>客户是否可见</FormLabel>
               <div className="flex items-center space-x-2">
                 <Switch
                   checked={form.watch('visible')}
                   onCheckedChange={(checked) => form.setValue('visible', checked)}
                 />
-                <label className="text-sm text-muted-foreground">在猫咖中显示</label>
+                <label className="text-sm text-muted-foreground">在猫咖小程序中显示</label>
               </div>
             </div>
           </div>
