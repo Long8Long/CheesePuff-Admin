@@ -38,6 +38,11 @@ const storeTypeOptions = [
   { label: '分店', value: 'branch' },
 ]
 
+const storeActiveOptions = [
+  { label: '可见', value: 'true' },
+  { label: '隐藏', value: 'false' },
+]
+
 export function StoresTable() {
   const { setRefetch } = useStores()
   const [rowSelection, setRowSelection] = useState({})
@@ -59,6 +64,7 @@ export function StoresTable() {
     globalFilter: { enabled: true, key: 'filter' },
     columnFilters: [
       { columnId: 'type', searchKey: 'type', type: 'array' },
+      { columnId: 'isActive', searchKey: 'isActive', type: 'array' },
     ],
   })
 
@@ -166,6 +172,11 @@ export function StoresTable() {
             columnId: 'type',
             title: '门店类型',
             options: storeTypeOptions,
+          },
+          {
+            columnId: 'isActive',
+            title: '小程序可见',
+            options: storeActiveOptions,
           },
         ]}
       />

@@ -2,6 +2,7 @@ import type { ColumnDef } from '@tanstack/react-table'
 import { DataTableColumnHeader } from '@/components/data-table/column-header'
 import { DataTableRowActions } from './data-table-row-actions'
 import { Badge } from '@/components/ui/badge'
+import { Switch } from '@/components/ui/switch'
 import type { Store } from '../models/store.types'
 
 export const storesColumns: ColumnDef<Store>[] = [
@@ -29,6 +30,29 @@ export const storesColumns: ColumnDef<Store>[] = [
         <Badge variant={type === 'main' ? 'default' : 'secondary'}>
           {type === 'main' ? '总店' : type === 'branch' ? '分店' : '-'}
         </Badge>
+      )
+    },
+    enableSorting: true,
+    enableHiding: true,
+  },
+  {
+    accessorKey: 'isActive',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="小程序可见" />
+    ),
+    cell: ({ row }) => {
+      const isActive = row.getValue('isActive') as boolean | null
+      return (
+        <div className="flex items-center gap-2">
+          <Switch
+            checked={isActive ?? false}
+            disabled
+            className="pointer-events-none"
+          />
+          <span className="text-sm text-muted-foreground">
+            {isActive ? '可见' : '隐藏'}
+          </span>
+        </div>
       )
     },
     enableSorting: true,
