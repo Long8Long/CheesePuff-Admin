@@ -46,32 +46,52 @@ export function StoresMutateDialog({
     defaultValues: currentRow
       ? {
           name: currentRow.name,
-          storeType: currentRow.storeType ?? undefined,
-          ownerContact: currentRow.ownerContact ?? '',
-          location: currentRow.location ?? '',
+          type: currentRow.type ?? undefined,
+          phone: currentRow.phone ?? '',
+          wechat: currentRow.wechat ?? '',
+          address: currentRow.address ?? '',
           businessHours: currentRow.businessHours ?? '',
-          catteryDescription: currentRow.catteryDescription ?? '',
+          description: currentRow.description ?? '',
+          isActive: currentRow.isActive,
+          location: currentRow.location ?? undefined,
         }
       : {
           name: '',
-          storeType: undefined,
-          ownerContact: '',
-          location: '',
+          type: undefined,
+          phone: '',
+          wechat: '',
+          address: '',
           businessHours: '',
-          catteryDescription: '',
+          description: '',
+          isActive: true,
+          location: undefined,
         },
   })
 
   const onSubmit = async (data: StoreFormData) => {
     try {
-      // For create: only send name (required field)
-      // For update: send name and/or isActive
       const requestData: StoreCreate | StoreUpdate = isUpdate
         ? {
             name: data.name || undefined,
+            type: data.type,
+            phone: data.phone || undefined,
+            wechat: data.wechat || undefined,
+            address: data.address || undefined,
+            businessHours: data.businessHours || undefined,
+            description: data.description || undefined,
+            isActive: data.isActive,
+            location: data.location,
           }
         : {
             name: data.name,
+            type: data.type,
+            phone: data.phone || undefined,
+            wechat: data.wechat || undefined,
+            address: data.address || undefined,
+            businessHours: data.businessHours || undefined,
+            description: data.description || undefined,
+            isActive: data.isActive ?? true,
+            location: data.location,
           }
 
       if (isUpdate && currentRow) {
@@ -118,7 +138,7 @@ export function StoresMutateDialog({
 
             <FormField
               control={form.control}
-              name="storeType"
+              name="type"
               render={({ field }) => (
                 <FormItem className="space-y-3">
                   <FormLabel>门店类型</FormLabel>
@@ -149,10 +169,10 @@ export function StoresMutateDialog({
 
             <FormField
               control={form.control}
-              name="ownerContact"
+              name="phone"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>老板联系方式</FormLabel>
+                  <FormLabel>手机号</FormLabel>
                   <FormControl>
                     <Input {...field} placeholder="请输入手机号码" value={field.value ?? ''} onChange={(e) => field.onChange(e.target.value)} />
                   </FormControl>
@@ -163,12 +183,26 @@ export function StoresMutateDialog({
 
             <FormField
               control={form.control}
-              name="location"
+              name="wechat"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>位置</FormLabel>
+                  <FormLabel>微信号</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder="请输入位置信息" value={field.value ?? ''} onChange={(e) => field.onChange(e.target.value)} />
+                    <Input {...field} placeholder="请输入微信号" value={field.value ?? ''} onChange={(e) => field.onChange(e.target.value)} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="address"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>地址</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="请输入地址信息" value={field.value ?? ''} onChange={(e) => field.onChange(e.target.value)} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -191,7 +225,7 @@ export function StoresMutateDialog({
 
             <FormField
               control={form.control}
-              name="catteryDescription"
+              name="description"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>猫舍介绍</FormLabel>

@@ -19,15 +19,15 @@ export const storesColumns: ColumnDef<Store>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: 'storeType',
+    accessorKey: 'type',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="类型" />
     ),
     cell: ({ row }) => {
-      const storeType = row.getValue('storeType') as string | null
+      const type = row.getValue('type') as string | null
       return (
-        <Badge variant={storeType === 'main' ? 'default' : 'secondary'}>
-          {storeType === 'main' ? '总店' : storeType === 'branch' ? '分店' : '-'}
+        <Badge variant={type === 'main' ? 'default' : 'secondary'}>
+          {type === 'main' ? '总店' : type === 'branch' ? '分店' : '-'}
         </Badge>
       )
     },
@@ -35,25 +35,37 @@ export const storesColumns: ColumnDef<Store>[] = [
     enableHiding: true,
   },
   {
-    accessorKey: 'ownerContact',
+    accessorKey: 'phone',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="联系方式" />
+      <DataTableColumnHeader column={column} title="手机号" />
     ),
     cell: ({ row }) => {
-      const contact = row.getValue('ownerContact') as string | null
-      return <div className="max-w-[150px] truncate">{contact || '-'}</div>
+      const phone = row.getValue('phone') as string | null
+      return <div className="max-w-[150px] truncate">{phone || '-'}</div>
     },
     enableSorting: false,
     enableHiding: true,
   },
   {
-    accessorKey: 'location',
+    accessorKey: 'wechat',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="位置" />
+      <DataTableColumnHeader column={column} title="微信号" />
     ),
     cell: ({ row }) => {
-      const location = row.getValue('location') as string | null
-      return <div className="max-w-[200px] truncate">{location || '-'}</div>
+      const wechat = row.getValue('wechat') as string | null
+      return <div className="max-w-[150px] truncate">{wechat || '-'}</div>
+    },
+    enableSorting: false,
+    enableHiding: true,
+  },
+  {
+    accessorKey: 'address',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="地址" />
+    ),
+    cell: ({ row }) => {
+      const address = row.getValue('address') as string | null
+      return <div className="max-w-[200px] truncate">{address || '-'}</div>
     },
     enableSorting: false,
     enableHiding: true,
@@ -71,12 +83,12 @@ export const storesColumns: ColumnDef<Store>[] = [
     enableHiding: true,
   },
   {
-    accessorKey: 'catteryDescription',
+    accessorKey: 'description',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="猫舍介绍" />
     ),
     cell: ({ row }) => {
-      const desc = row.getValue('catteryDescription') as string | null
+      const desc = row.getValue('description') as string | null
       return <div className="max-w-[250px] truncate">{desc || '-'}</div>
     },
     enableSorting: false,

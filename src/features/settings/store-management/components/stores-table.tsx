@@ -58,7 +58,7 @@ export function StoresTable() {
     pagination: { defaultPage: 1, defaultPageSize: 10 },
     globalFilter: { enabled: true, key: 'filter' },
     columnFilters: [
-      { columnId: 'storeType', searchKey: 'type', type: 'array' },
+      { columnId: 'type', searchKey: 'type', type: 'array' },
     ],
   })
 
@@ -103,12 +103,12 @@ export function StoresTable() {
     onColumnVisibilityChange: setColumnVisibility,
     globalFilterFn: (row, _columnId, filterValue) => {
       const name = String(row.getValue('name')).toLowerCase()
-      const location = String(row.getValue('location') ?? '').toLowerCase()
+      const address = String(row.getValue('address') ?? '').toLowerCase()
       const searchValue = String(filterValue).toLowerCase()
 
       return (
         name.includes(searchValue) ||
-        location.includes(searchValue)
+        address.includes(searchValue)
       )
     },
     getCoreRowModel: getCoreRowModel(),
@@ -158,12 +158,12 @@ export function StoresTable() {
     >
       <DataTableToolbar
         table={table}
-        searchPlaceholder="搜索门店名称、位置..."
+        searchPlaceholder="搜索门店名称、地址..."
         onRefresh={handleRefresh}
         isRefreshing={isFetching}
         filters={[
           {
-            columnId: 'storeType',
+            columnId: 'type',
             title: '门店类型',
             options: storeTypeOptions,
           },
