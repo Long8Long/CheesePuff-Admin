@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { Sparkles, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { getTodayString } from '@/lib/utils'
@@ -65,6 +65,7 @@ export function CatsMutateDialog({
   onSuccess,
 }: CatMutateDialogProps) {
   const isUpdate = !!currentRow
+  const continueAddingRef = useRef(false)
   const [activeTab, setActiveTab] = useState<'ai' | 'manual'>('manual')
   const [aiFilledFields, setAiFilledFields] = useState<Set<string>>(new Set())
   const [apiBreeds, setApiBreeds] = useState<Array<{ label: string; value: string }>>([])
@@ -125,7 +126,7 @@ export function CatsMutateDialog({
 
   // 合并API品种和自定义品种
   const breeds = useMemo(() => {
-    return [...apiBreeds, ...customBreeds]
+    return [...customBreeds, ...apiBreeds]
   }, [apiBreeds, customBreeds])
 
   // 获取默认店铺（第一个激活的店铺）
@@ -140,7 +141,7 @@ export function CatsMutateDialog({
 
   const handleAddBreed = (name: string) => {
     const newBreed = { label: name, value: name }
-    setCustomBreeds((prev) => [...prev, newBreed])
+    setCustomBreeds((prev) => [newBreed, ...prev])
     // 自动选中新添加的品种
     form.setValue('breed', name)
   }
@@ -173,6 +174,8 @@ export function CatsMutateDialog({
   })
 
   const onSubmit = async (data: CatForm) => {
+    const shouldContinue = continueAddingRef.current
+    continueAddingRef.current = false
     setIsSubmitting(true)
 
     try {
@@ -206,13 +209,28 @@ export function CatsMutateDialog({
         toast.success('猫咪添加成功')
       }
 
-      // 关闭对话框并重置表单
-      onOpenChange(false)
-      form.reset()
-      setAiFilledFields(new Set())
-
       // 触发成功回调（刷新列表）
       onSuccess?.()
+
+      if (shouldContinue) {
+        // Reset form but keep dialog open for next entry
+        form.reset({
+          name: '',
+          breed: '',
+          storeName: defaultStore || undefined,
+          birthday: getTodayString(),
+          price: '',
+          images: [],
+          description: '',
+          catcafeStatus: defaultStatus || undefined,
+          visible: true,
+        })
+        setAiFilledFields(new Set())
+      } else {
+        onOpenChange(false)
+        form.reset()
+        setAiFilledFields(new Set())
+      }
     } catch (error) {
       const errorMessage = (error as { message?: string })?.message || '操作失败，请重试'
       toast.error(errorMessage)
@@ -349,6 +367,25 @@ export function CatsMutateDialog({
             <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
               取消
             </Button>
+            {!isUpdate && (
+              <Button
+                variant="secondary"
+                disabled={isSubmitting}
+                onClick={() => {
+                  continueAddingRef.current = true
+                  form.handleSubmit(onSubmit)()
+                }}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    添加中...
+                  </>
+                ) : (
+                  '保存并继续录入'
+                )}
+              </Button>
+            )}
             <Button form="cats-form" type="submit" disabled={isSubmitting}>
               {isSubmitting ? (
                 <>
