@@ -33,7 +33,6 @@ import type { CatAIOutput } from '../data/ai-schema'
 import { catsService } from '../services/cats.service'
 import { uploadService } from '../services/uploads.service'
 import { CatsAIFillTab } from './cats-ai-fill-tab'
-import { BreedDialog } from './breed-dialog'
 import { configsService } from '@/features/settings/cattery-config/services/configs.service'
 import { storesService } from '@/features/settings/store-management/services/stores.service'
 
@@ -71,7 +70,6 @@ export function CatsMutateDialog({
   const [apiBreeds, setApiBreeds] = useState<Array<{ label: string; value: string }>>([])
   const [apiStatuses, setApiStatuses] = useState<Array<{ label: string; value: string }>>([])
   const [apiStores, setApiStores] = useState<Array<{ label: string; value: string }>>([])
-  const [customBreeds, setCustomBreeds] = useState<Array<{ label: string; value: string }>>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isLoadingBreeds, setIsLoadingBreeds] = useState(true)
   const [isLoadingStatuses, setIsLoadingStatuses] = useState(true)
@@ -124,10 +122,7 @@ export function CatsMutateDialog({
     fetchConfigData()
   }, [])
 
-  // 合并API品种和自定义品种
-  const breeds = useMemo(() => {
-    return [...customBreeds, ...apiBreeds]
-  }, [apiBreeds, customBreeds])
+  const breeds = useMemo(() => apiBreeds, [apiBreeds])
 
   // 获取默认店铺（第一个激活的店铺）
   const defaultStore = useMemo(() => {
@@ -138,13 +133,6 @@ export function CatsMutateDialog({
   const defaultStatus = useMemo(() => {
     return apiStatuses.length > 0 ? apiStatuses[0].value : ''
   }, [apiStatuses])
-
-  const handleAddBreed = (name: string) => {
-    const newBreed = { label: name, value: name }
-    setCustomBreeds((prev) => [newBreed, ...prev])
-    // 自动选中新添加的品种
-    form.setValue('breed', name)
-  }
 
   const form = useForm<CatForm>({
     resolver: zodResolver(formSchema),
@@ -332,7 +320,6 @@ export function CatsMutateDialog({
                 onResetAI={handleResetAI}
                 onSubmit={onSubmit}
                 breeds={breeds}
-                onAddBreed={handleAddBreed}
                 isLoadingBreeds={isLoadingBreeds}
                 apiStatuses={apiStatuses}
                 isLoadingStatuses={isLoadingStatuses}
@@ -352,7 +339,6 @@ export function CatsMutateDialog({
             onResetAI={handleResetAI}
             onSubmit={onSubmit}
             breeds={breeds}
-            onAddBreed={handleAddBreed}
             isLoadingBreeds={isLoadingBreeds}
             apiStatuses={apiStatuses}
             isLoadingStatuses={isLoadingStatuses}
@@ -411,7 +397,6 @@ function FormWrapper({
   onResetAI,
   onSubmit,
   breeds,
-  onAddBreed,
   isLoadingBreeds,
   apiStatuses,
   isLoadingStatuses,
@@ -424,15 +409,12 @@ function FormWrapper({
   onResetAI: () => void
   onSubmit: (data: CatForm) => void
   breeds: Array<{ label: string; value: string }>
-  onAddBreed: (name: string) => void
   isLoadingBreeds?: boolean
   apiStatuses: Array<{ label: string; value: string }>
   isLoadingStatuses?: boolean
   apiStores: Array<{ label: string; value: string }>
   isLoadingStores?: boolean
 }) {
-  const [showBreedDialog, setShowBreedDialog] = useState(false)
-
   return (
     <>
       {/* AI 填充成功提示 */}
@@ -473,25 +455,22 @@ function FormWrapper({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                   品种 <span className="text-destructive">*</span>
+                    品种 <span className="text-destructive">*</span>
                     {aiFilledFields.has('breed') && <Badge />}
                   </FormLabel>
-                  <div className="flex gap-2">
-                    <SelectDropdown
-                      defaultValue={field.value}
-                      onValueChange={field.onChange}
-                      placeholder={isLoadingBreeds ? '加载品种列表中...' : '请选择品种'}
-                      items={breeds}
-                      allowAddNew
-                      onAddNew={() => setShowBreedDialog(true)}
-                      addNewLabel="添加新品种"
-                      className="flex-1"
+                  <FormControl>
+                    <Input
+                      {...field}
+                      list="breed-options"
+                      placeholder={isLoadingBreeds ? '加载品种列表中...' : '请输入或选择品种'}
                       disabled={isLoadingBreeds}
                     />
-                    {isLoadingBreeds && (
-                      <Loader2 className="h-10 w-10 animate-spin text-muted-foreground" />
-                    )}
-                  </div>
+                  </FormControl>
+                  <datalist id="breed-options">
+                    {breeds.map((b) => (
+                      <option key={b.value} value={b.value} />
+                    ))}
+                  </datalist>
                   <FormMessage />
                 </FormItem>
               )}
@@ -648,12 +627,6 @@ function FormWrapper({
         </form>
       </Form>
 
-      {/* 添加新品种对话框 */}
-      <BreedDialog
-        open={showBreedDialog}
-        onOpenChange={setShowBreedDialog}
-        onAdd={onAddBreed}
-      />
     </>
   )
 }
