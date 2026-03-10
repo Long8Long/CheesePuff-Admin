@@ -17,11 +17,11 @@ export function useAIFormFill() {
     setLoading(true)
     setError(null)
     try {
-      const response = await api.post<{ data: FormFillResponse }>('/api/v1/ai/form/fill', {
+      const response = await api.post<{ formData: FormFillResponse }>('/api/v1/ai/form/fill', {
         form_type: formType,
         text,
       })
-      return response.data.data
+      return response.data.formData
     } catch (err) {
       let errorMessage = 'AI 填充失败'
       if (err && typeof err === 'object' && 'response' in err) {

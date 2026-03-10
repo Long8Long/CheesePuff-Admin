@@ -51,7 +51,7 @@ const formSchema = z.object({
   price: z.string().optional(),
   images: z.array(z.string()).optional(),
   description: z.string().optional(),
-  catcafeStatus: z.string().optional(),
+  catcafeStatus: z.string().min(1, '请选择工作状态'),
   visible: z.boolean().optional(),
 })
 
@@ -566,7 +566,7 @@ function FormWrapper({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    工作状态（猫咖）
+                    工作状态（猫咖）<span className="text-destructive">*</span>
                     {aiFilledFields.has('catcafeStatus') && <Badge />}
                   </FormLabel>
                   <div className="flex gap-2">
