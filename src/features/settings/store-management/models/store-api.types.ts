@@ -1,3 +1,7 @@
+import type { Store } from './store.types'
+import type { StoreType } from './store.types'
+export type { StoreType } from './store.types'
+
 export interface GetStoresListParams {
   page?: number
   pageSize?: number
@@ -44,6 +48,3 @@ export interface PaginatedStoreResponse {
   stores: Store[]
   pagination: StorePagination
 }
-
-import type { Store } from './store.types'
-export type { StoreType } from './store.types'
