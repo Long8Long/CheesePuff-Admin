@@ -116,6 +116,8 @@ pnpm run dev
 
 访问 `http://localhost:5173` 查看应用
 
+**默认登录账号**: `admin` / `admin123`
+
 ### 构建生产版本
 
 ```bash
