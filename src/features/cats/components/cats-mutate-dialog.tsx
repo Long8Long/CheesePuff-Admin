@@ -28,6 +28,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { SelectDropdown } from '@/components/select-dropdown'
+import { BreedCombobox } from './breed-combobox'
 import type { Cat, CatCreate, CatUpdate } from '../models'
 import type { CatAIOutput } from '../data/ai-schema'
 import { catsService } from '../services/cats.service'
@@ -476,11 +477,10 @@ function FormWrapper({
                    品种 <span className="text-destructive">*</span>
                     {aiFilledFields.has('breed') && <Badge />}
                   </FormLabel>
-                  <div className="flex gap-2">
-                    <SelectDropdown
-                      defaultValue={field.value}
+                    <BreedCombobox
+                      value={field.value}
                       onValueChange={field.onChange}
-                      placeholder={isLoadingBreeds ? '加载品种列表中...' : '请选择品种'}
+                      placeholder={isLoadingBreeds ? '加载品种列表中...' : '输入或选择品种'}
                       items={breeds}
                       allowAddNew
                       onAddNew={() => setShowBreedDialog(true)}
@@ -488,10 +488,6 @@ function FormWrapper({
                       className="flex-1"
                       disabled={isLoadingBreeds}
                     />
-                    {isLoadingBreeds && (
-                      <Loader2 className="h-10 w-10 animate-spin text-muted-foreground" />
-                    )}
-                  </div>
                   <FormMessage />
                 </FormItem>
               )}
