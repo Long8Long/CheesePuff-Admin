@@ -31,7 +31,7 @@ export function CatsDeleteDialog({
 
     try {
       await catsService.delete(currentRow.id)
-      toast.success(`已删除猫咪: ${currentRow.name || currentRow.id}`)
+      toast.success(`已删除猫咪: ${currentRow.name || '未命名猫咪'}`)
 
       onOpenChange(false)
 
@@ -63,17 +63,10 @@ export function CatsDeleteDialog({
       desc={
         <div className='space-y-4'>
           <p className='mb-2'>
-            确定要删除猫咪 <strong>{currentRow?.name || currentRow?.id}</strong>
+            确定要删除猫咪<strong>{currentRow?.name || '未命名猫咪'}</strong>
             吗？<br />
             此操作无法撤销。
           </p>
-
-          <Alert variant='destructive'>
-            <AlertTitle>警告！</AlertTitle>
-            <AlertDescription>
-              此操作不可撤销，请谨慎操作。
-            </AlertDescription>
-          </Alert>
         </div>
       }
       confirmText={isDeleting ? (
