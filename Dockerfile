@@ -37,8 +37,8 @@ COPY --from=builder /app/dist ./dist
 ENV NODE_ENV=production
 ENV PORT=80
 
-# Expose port 80
-EXPOSE 80
+# Expose port 8002
+EXPOSE 8002
 
 # Start serve (SPA mode)
-CMD ["serve", "-s", "dist", "-l", "80"]
+CMD ["serve", "-s", "dist", "-l", "8002"]
