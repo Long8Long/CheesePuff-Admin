@@ -54,21 +54,21 @@ jobs:
       - name: Copy to server
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: ${{ secrets.HW_HOST }}
-          username: ${{ secrets.HW_USERNAME }}
-          key: ${{ secrets.HW_PRIVATE_KEY }}
-          port: ${{ secrets.HW_PORT || 22 }}
+          host: ${{ secrets.ADMIN_HOST_PROD }}
+          username: ${{ secrets.ADMIN_USERNAME_PROD }}
+          key: ${{ secrets.ADMIN_PRIVATE_KEY_PROD }}
+          port: ${{ secrets.ADMIN_PORT_PROD || 22 }}
           source: 'deploy.tar.gz'
-          target: '${{ secrets.HW_TARGET_DIR }}'
+          target: '${{ secrets.ADMIN_TARGET_DIR_PROD }}'
           timeout: 300s
 
       - name: Deploy Docker container
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.HW_HOST }}
-          username: ${{ secrets.HW_USERNAME }}
-          key: ${{ secrets.HW_PRIVATE_KEY }}
-          port: ${{ secrets.HW_PORT || 22 }}
+          host: ${{ secrets.ADMIN_HOST_PROD }}
+          username: ${{ secrets.ADMIN_USERNAME_PROD }}
+          key: ${{ secrets.ADMIN_PRIVATE_KEY_PROD }}
+          port: ${{ secrets.ADMIN_PORT_PROD || 22 }}
           script: |
             IMAGE_TAG="${{ steps.version.outputs.tag }}"
             IMAGE_NAME="${{ env.IMAGE_NAME }}"
@@ -78,7 +78,7 @@ jobs:
             echo "Deploying version: $IMAGE_NAME:$IMAGE_TAG"
             echo "=========================================="
 
-            cd ${{ secrets.HW_TARGET_DIR }}
+            cd ${{ secrets.ADMIN_TARGET_DIR_PROD }}
 
             BACKUP_DIR="backup_$(date +%Y%m%d_%H%M%S)"
             mkdir -p "$BACKUP_DIR"
