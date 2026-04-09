@@ -110,8 +110,9 @@ jobs:
               --name ${CONTAINER_NAME} \
               --network 1panel-network \
               --restart unless-stopped \
-              ${IMAGE_NAME}:${IMAGE_TAG}\
-              -p 8002:8002
+              -p 8002:8002 \
+              ${IMAGE_NAME}:${IMAGE_TAG}
+
 
             sleep 5
 
