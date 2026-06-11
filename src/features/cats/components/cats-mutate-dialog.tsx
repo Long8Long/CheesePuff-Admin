@@ -19,6 +19,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { ImageUpload } from '@/components/ui/image-upload'
+import { VideoUpload } from '@/components/ui/video-upload'
 import {
   Dialog,
   DialogContent,
@@ -52,6 +53,7 @@ const formSchema = z.object({
   birthday: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, '日期格式错误'),
   price: z.string().optional(),
   images: z.array(z.string()).optional(),
+  videos: z.array(z.string()).optional(),
   description: z.string().optional(),
   catcafeStatus: z.string().min(1, '请选择工作状态'),
   visible: z.boolean().optional(),
@@ -157,6 +159,7 @@ export function CatsMutateDialog({
           birthday: currentRow.birthday ?? undefined,
           price: String(currentRow.price ?? ''),
           images: currentRow.images ?? [],
+          videos: currentRow.videos ?? [],
           description: currentRow.description ?? '',
           catcafeStatus: currentRow.catcafeStatus ?? undefined,
           visible: currentRow.visible,
@@ -168,6 +171,7 @@ export function CatsMutateDialog({
           birthday: getTodayString(),
           price: '',
           images: [],
+          videos: [],
           description: '',
           catcafeStatus: defaultStatus || undefined,
           visible: true,
@@ -195,6 +199,8 @@ export function CatsMutateDialog({
         price: data.price ? Number.parseFloat(data.price) : null,
         images: data.images && data.images.length > 0 ? data.images : null,
         thumbnail: data.images && data.images.length > 0 ? data.images[0] : null,
+        videos: data.videos && data.videos.length > 0 ? data.videos : null,
+        videoThumbnail: null,
         description: emptyStringToNull(data.description),
         catcafeStatus: emptyStringToNull<Cat['catcafeStatus']>(data.catcafeStatus),
         visible: data.visible ?? true,
@@ -222,6 +228,7 @@ export function CatsMutateDialog({
           birthday: getTodayString(),
           price: '',
           images: [],
+          videos: [],
           description: '',
           catcafeStatus: defaultStatus || undefined,
           visible: true,
@@ -633,6 +640,33 @@ function FormWrapper({
                         .map((r) => ({
                           url: r.originalUrl as string,
                           thumbnailUrl: r.thumbnailUrl || r.originalUrl || '',
+                        }))
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="videos"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>视频</FormLabel>
+                <FormControl>
+                  <VideoUpload
+                    value={field.value}
+                    onChange={field.onChange}
+                    maxCount={5}
+                    uploadFn={async (files) => {
+                      const results = await uploadService.uploadVideos(files)
+                      return results
+                        .filter((r) => r.success && r.originalUrl)
+                        .map((r) => ({
+                          url: r.originalUrl as string,
+                          thumbnailUrl: r.thumbnailUrl,
                         }))
                     }}
                   />

@@ -75,6 +75,8 @@ function generateCat(id: number): Cat {
     price,
     images,
     thumbnail: images[0],
+    videos: null,
+    videoThumbnail: null,
     description: faker.helpers.arrayElement(descriptions),
     catcafeStatus: faker.helpers.arrayElement([
       '工作中',

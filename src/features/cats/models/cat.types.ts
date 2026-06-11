@@ -41,6 +41,8 @@ export interface Cat {
   price: number | null
   images: string[] | null
   thumbnail: string | null
+  videos: string[] | null
+  videoThumbnail: string | null
   description: string | null | undefined
   catcafeStatus: CatCafeStatus | null | undefined
   visible: boolean

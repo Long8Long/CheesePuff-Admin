@@ -17,6 +17,8 @@ export const catSchema = z.object({
   price: z.number().positive('价格必须大于0').nullish(),
   images: z.array(z.string()).nullish(),
   thumbnail: z.string().nullish(),
+  videos: z.array(z.string()).nullish(),
+  videoThumbnail: z.string().nullish(),
   description: z.string().nullish(),
   catcafeStatus: z.string().nullish(),
   visible: z.boolean().default(true),
