@@ -17,6 +17,7 @@ import {
 import { cn } from '@/lib/utils'
 import { useTableUrlState } from '@/hooks/use-table-url-state'
 import { catsService } from '@/features/cats/services/cats.service'
+import { configsService } from '@/features/settings/cattery-config/services/configs.service'
 import {
   Table,
   TableBody,
@@ -28,7 +29,7 @@ import {
 import { DataTablePagination, DataTableToolbar } from '@/components/data-table'
 import { DataTableBulkActions } from './data-table-bulk-actions'
 import { catsColumns as columns } from './cats-columns'
-import { breeds, catCafeStatuses } from '../data/data'
+import { catCafeStatuses as fallbackStatuses, breeds as fallbackBreeds } from '../data/data'
 
 const route = getRouteApi('/_authenticated/cats')
 
@@ -37,6 +38,31 @@ export function CatsTable() {
   const [rowSelection, setRowSelection] = useState({})
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+  const [apiBreeds, setApiBreeds] = useState(fallbackBreeds)
+  const [apiStatuses, setApiStatuses] = useState(fallbackStatuses)
+
+  // Fetch filter options from config API
+  useEffect(() => {
+    const fetchConfigData = async () => {
+      try {
+        const [breedsRes, statusesRes] = await Promise.all([
+          configsService.getByKey('cat_breeds'),
+          configsService.getByKey('cat_statuses'),
+        ])
+        const breedValues = breedsRes.value as string[]
+        const statusValues = statusesRes.value as string[]
+        if (Array.isArray(breedValues) && breedValues.length > 0) {
+          setApiBreeds(breedValues.map((b) => ({ label: b, value: b })))
+        }
+        if (Array.isArray(statusValues) && statusValues.length > 0) {
+          setApiStatuses(statusValues.map((s) => ({ label: s, value: s })))
+        }
+      } catch {
+        // Keep fallback values on error
+      }
+    }
+    fetchConfigData()
+  }, [])
 
   // Synced with URL states
   const {
@@ -162,12 +188,12 @@ export function CatsTable() {
           {
             columnId: 'breed',
             title: '品种',
-            options: breeds,
+            options: apiBreeds,
           },
           {
             columnId: 'catcafeStatus',
             title: '状态',
-            options: catCafeStatuses,
+            options: apiStatuses,
           },
         ]}
       />
