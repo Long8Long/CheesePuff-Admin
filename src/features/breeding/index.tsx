@@ -4,7 +4,6 @@ import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { BreedingCards } from './components/breeding-cards'
-import { BreedingKanban } from './components/breeding-kanban'
 import { BreedingRecordsTable } from './components/breeding-records-table'
 
 export function Breeding() {
@@ -29,7 +28,6 @@ export function Breeding() {
         </div>
 
         <BreedingCards />
-        <BreedingKanban />
         <BreedingRecordsTable />
       </Main>
     </>

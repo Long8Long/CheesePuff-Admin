@@ -26,7 +26,10 @@ export const stockStatuses = [
 ]
 
 // 状态颜色映射
-export const statusColorMap = {
+export const statusColorMap: Record<
+  'normal' | 'warning' | 'urgent',
+  string
+> = {
   normal: 'bg-teal-100/30 text-teal-900 dark:text-teal-200 border-teal-200',
   warning: 'bg-amber-100/30 text-amber-900 dark:text-amber-200 border-amber-200',
   urgent: 'bg-destructive/10 dark:bg-destructive/50 text-destructive dark:text-primary border-destructive/10',
@@ -160,7 +163,7 @@ export const inventoryData = [
   },
   {
     id: 'P009',
-    name: ' wellness 猫罐头 CORE 无谷鸡肉 85g',
+    name: 'wellness 猫罐头 CORE 无谷鸡肉 85g',
     category: '猫罐头',
     currentStock: 56,
     unitPrice: 22,

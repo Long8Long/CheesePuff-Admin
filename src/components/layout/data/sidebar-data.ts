@@ -27,7 +27,7 @@ export const sidebarData: SidebarData = {
       title: '数据统计',
       items: [
         {
-          title: '数据统计',
+          title: '总览',
           url: '/statistics',
           icon: BarChart3,
         },
