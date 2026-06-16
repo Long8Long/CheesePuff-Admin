@@ -28,6 +28,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { ConfirmDialog } from '@/components/confirm-dialog'
 import { SelectDropdown } from '@/components/select-dropdown'
 import { BreedCombobox } from './breed-combobox'
 import type { Cat, CatCreate, CatUpdate } from '../models'
@@ -76,6 +77,7 @@ export function CatsMutateDialog({
   const [apiStores, setApiStores] = useState<Array<{ label: string; value: string }>>([])
   const [customBreeds, setCustomBreeds] = useState<Array<{ label: string; value: string }>>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [confirmClose, setConfirmClose] = useState(false)
   const [isLoadingBreeds, setIsLoadingBreeds] = useState(true)
   const [isLoadingStatuses, setIsLoadingStatuses] = useState(true)
   const [isLoadingStores, setIsLoadingStores] = useState(true)
@@ -288,6 +290,15 @@ export function CatsMutateDialog({
     setActiveTab('manual') // 切换到手动填写 Tab 查看结果
   }
 
+  // 用户主动关闭表单时，若有未保存改动（含已上传的图片/视频）先弹确认框，避免误关丢失
+  const handleCloseRequest = () => {
+    if (form.formState.isDirty) {
+      setConfirmClose(true)
+    } else {
+      onOpenChange(false)
+    }
+  }
+
   const handleResetAI = () => {
     setAiFilledFields(new Set())
     form.reset()
@@ -305,7 +316,11 @@ export function CatsMutateDialog({
   return (
     <Dialog
       open={open}
-      onOpenChange={onOpenChange}
+      onOpenChange={(next) => {
+        // 关闭请求（next=false）经拦截器判断是否弹确认；打开请求直接透传
+        if (!next) handleCloseRequest()
+        else onOpenChange(next)
+      }}
     >
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
@@ -372,7 +387,7 @@ export function CatsMutateDialog({
         {/* Dialog Footer - 只在编辑模式或手动填写 Tab 时显示 */}
         {(isUpdate || activeTab === 'manual') && (
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
+            <Button variant="outline" onClick={handleCloseRequest} disabled={isSubmitting}>
               取消
             </Button>
             {!isUpdate && (
@@ -407,6 +422,20 @@ export function CatsMutateDialog({
           </DialogFooter>
         )}
       </DialogContent>
+      {/* 放弃未保存更改（含已上传的图片/视频）的确认框 */}
+      <ConfirmDialog
+        open={confirmClose}
+        onOpenChange={setConfirmClose}
+        destructive
+        title="放弃更改?"
+        desc="您有未保存的更改（含已上传的图片/视频），关闭后这些内容将丢失，已上传文件需重新上传。确定放弃吗？"
+        confirmText="放弃"
+        cancelBtnText="继续编辑"
+        handleConfirm={() => {
+          setConfirmClose(false)
+          onOpenChange(false) // 真正关闭；随后既有 useEffect[!open] 会 form.reset()
+        }}
+      />
     </Dialog>
   )
 }
