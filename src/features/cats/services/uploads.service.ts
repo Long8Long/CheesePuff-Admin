@@ -101,7 +101,7 @@ export const uploadService = {
 
   /**
    * Upload cat videos / 上传猫咪视频
-   * POST /api/v1/admin/uploads/batch (upload_type=video)
+   * POST /api/v1/admin/uploads/batch (upload_type=cat_video)
    *
    * @param files - List of video files to upload
    * @returns Promise<UploadFile[]> - Array of upload results (only successful ones)
@@ -116,7 +116,7 @@ export const uploadService = {
 
     const formData = new FormData()
     validFiles.forEach((file) => formData.append('files', file))
-    formData.append('upload_type', 'video')
+    formData.append('upload_type', 'cat_video')
 
     const { data } = await api.post<BatchUploadResponse>(
       '/api/v1/admin/uploads/batch',
