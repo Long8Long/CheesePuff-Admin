@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState, useMemo, useEffect, useRef, type RefObject } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { Sparkles, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { getTodayString } from '@/lib/utils'
@@ -74,62 +75,51 @@ export function CatsMutateDialog({
   const videoThumbnailsRef = useRef<Record<string, string>>({})
   const [activeTab, setActiveTab] = useState<'ai' | 'manual'>('manual')
   const [aiFilledFields, setAiFilledFields] = useState<Set<string>>(new Set())
-  const [apiBreeds, setApiBreeds] = useState<Array<{ label: string; value: string }>>([])
-  const [apiStatuses, setApiStatuses] = useState<Array<{ label: string; value: string }>>([])
-  const [apiStores, setApiStores] = useState<Array<{ label: string; value: string }>>([])
   const [customBreeds, setCustomBreeds] = useState<Array<{ label: string; value: string }>>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [confirmClose, setConfirmClose] = useState(false)
-  const [isLoadingBreeds, setIsLoadingBreeds] = useState(true)
-  const [isLoadingStatuses, setIsLoadingStatuses] = useState(true)
-  const [isLoadingStores, setIsLoadingStores] = useState(true)
 
-  // Fetch breeds, statuses and stores from API on component mount
-  useEffect(() => {
-    const fetchConfigData = async () => {
-      try {
-        setIsLoadingBreeds(true)
-        setIsLoadingStatuses(true)
-        setIsLoadingStores(true)
+  // 使用 TanStack Query 获取配置数据，自动处理缓存和去重
+  const breedsQuery = useQuery({
+    queryKey: ['config', 'cat_breeds'],
+    queryFn: () => configsService.getByKey('cat_breeds'),
+  })
 
-        // Fetch breeds
-        const breedsResponse = await configsService.getByKey('cat_breeds')
-        const breedValues = breedsResponse.value as string[]
-        const breeds = breedValues.map((breed) => ({
-          label: breed,
-          value: breed,
-        }))
-        setApiBreeds(breeds)
+  const statusesQuery = useQuery({
+    queryKey: ['config', 'cat_statuses'],
+    queryFn: () => configsService.getByKey('cat_statuses'),
+  })
 
-        // Fetch statuses
-        const statusesResponse = await configsService.getByKey('cat_statuses')
-        const statusValues = statusesResponse.value as string[]
-        const statuses = statusValues.map((status) => ({
-          label: status,
-          value: status,
-        }))
-        setApiStatuses(statuses)
+  const storesQuery = useQuery({
+    queryKey: ['stores', 'active'],
+    queryFn: () => storesService.getList({ activeOnly: true }),
+  })
 
-        // Fetch stores
-        const storesResponse = await storesService.getList({ activeOnly: true })
-        const stores = storesResponse.stores
-          .filter((store) => store.isActive)
-          .map((store) => ({
-            label: store.name,
-            value: store.name,
-          }))
-        setApiStores(stores)
-      } catch {
-        toast.error('获取配置数据失败')
-      } finally {
-        setIsLoadingBreeds(false)
-        setIsLoadingStatuses(false)
-        setIsLoadingStores(false)
-      }
+  // 从 query 数据中转换格式
+  const apiBreeds = useMemo(() => {
+    if (breedsQuery.data?.value) {
+      const breedValues = breedsQuery.data.value as string[]
+      return breedValues.map((breed) => ({ label: breed, value: breed }))
     }
+    return []
+  }, [breedsQuery.data])
 
-    fetchConfigData()
-  }, [])
+  const apiStatuses = useMemo(() => {
+    if (statusesQuery.data?.value) {
+      const statusValues = statusesQuery.data.value as string[]
+      return statusValues.map((status) => ({ label: status, value: status }))
+    }
+    return []
+  }, [statusesQuery.data])
+
+  const apiStores = useMemo(() => {
+    if (storesQuery.data?.stores) {
+      return storesQuery.data.stores
+        .filter((store) => store.isActive)
+        .map((store) => ({ label: store.name, value: store.name }))
+    }
+    return []
+  }, [storesQuery.data])
 
   // 合并API品种和自定义品种
   const breeds = useMemo(() => {
@@ -367,11 +357,11 @@ export function CatsMutateDialog({
                 onSubmit={onSubmit}
                 breeds={breeds}
                 onAddBreed={handleAddBreed}
-                isLoadingBreeds={isLoadingBreeds}
+                isLoadingBreeds={breedsQuery.isLoading}
                 apiStatuses={apiStatuses}
-                isLoadingStatuses={isLoadingStatuses}
+                isLoadingStatuses={statusesQuery.isLoading}
                 apiStores={apiStores}
-                isLoadingStores={isLoadingStores}
+                isLoadingStores={storesQuery.isLoading}
                 videoThumbnailsRef={videoThumbnailsRef}
               />
             </TabsContent>
@@ -388,11 +378,11 @@ export function CatsMutateDialog({
             onSubmit={onSubmit}
             breeds={breeds}
             onAddBreed={handleAddBreed}
-            isLoadingBreeds={isLoadingBreeds}
+            isLoadingBreeds={breedsQuery.isLoading}
             apiStatuses={apiStatuses}
-            isLoadingStatuses={isLoadingStatuses}
+            isLoadingStatuses={statusesQuery.isLoading}
             apiStores={apiStores}
-            isLoadingStores={isLoadingStores}
+            isLoadingStores={storesQuery.isLoading}
             videoThumbnailsRef={videoThumbnailsRef}
           />
         )}
@@ -648,18 +638,15 @@ function FormWrapper({
                       value={field.value}
                       onChange={field.onChange}
                       maxCount={5}
+                      thumbnailMapRef={videoThumbnailsRef}
                       uploadFn={async (files) => {
                         const results = await uploadService.uploadVideos(files)
-                        const mapped = results
+                        return results
                           .filter((r) => r.success && r.originalUrl)
                           .map((r) => ({
                             url: r.originalUrl as string,
                             thumbnailUrl: r.thumbnailUrl,
                           }))
-                        mapped.forEach((r) => {
-                          if (r.thumbnailUrl) videoThumbnailsRef.current[r.url] = r.thumbnailUrl
-                        })
-                        return mapped
                       }}
                     />
                   </FormControl>
