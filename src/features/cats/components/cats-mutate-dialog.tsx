@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useState, useMemo, useEffect, useRef, type RefObject } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Sparkles, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -34,6 +34,7 @@ import { SelectDropdown } from '@/components/select-dropdown'
 import { BreedCombobox } from './breed-combobox'
 import type { Cat, CatCreate, CatUpdate } from '../models'
 import type { CatAIOutput } from '../data/ai-schema'
+import { mediaItemSchema } from '../data/schema'
 import { catsService } from '../services/cats.service'
 import { uploadService } from '../services/uploads.service'
 import { CatsAIFillTab } from './cats-ai-fill-tab'
@@ -54,8 +55,9 @@ const formSchema = z.object({
   storeName: z.string().optional(),
   birthday: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, '日期格式错误'),
   price: z.string().optional(),
-  images: z.array(z.string()).optional(),
-  videos: z.array(z.string()).optional(),
+  // 配对结构：原图/视频与其缩略图原子绑定，与 Cat.images/Cat.videos 结构一致
+  images: z.array(mediaItemSchema).optional(),
+  videos: z.array(mediaItemSchema).optional(),
   description: z.string().optional(),
   catcafeStatus: z.string().min(1, '请选择工作状态'),
   visible: z.boolean().optional(),
@@ -71,8 +73,6 @@ export function CatsMutateDialog({
 }: CatMutateDialogProps) {
   const isUpdate = !!currentRow
   const continueAddingRef = useRef(false)
-  // 视频上传结果中 url → thumbnailUrl 的映射，提交时取首个缩略图赋给 videoThumbnail
-  const videoThumbnailsRef = useRef<Record<string, string>>({})
   const [activeTab, setActiveTab] = useState<'ai' | 'manual'>('manual')
   const [aiFilledFields, setAiFilledFields] = useState<Set<string>>(new Set())
   const [customBreeds, setCustomBreeds] = useState<Array<{ label: string; value: string }>>([])
@@ -184,7 +184,7 @@ export function CatsMutateDialog({
         return value as T
       }
 
-      // 构建请求数据
+      // 构建请求数据（images/videos 为配对对象数组，缩略图随对象原子绑定）
       const requestData: CatCreate | CatUpdate = {
         name: emptyStringToNull(data.name),
         breed: data.breed,
@@ -192,12 +192,7 @@ export function CatsMutateDialog({
         birthday: data.birthday,
         price: data.price ? Number.parseFloat(data.price) : null,
         images: data.images && data.images.length > 0 ? data.images : null,
-        thumbnail: data.images && data.images.length > 0 ? data.images[0] : null,
         videos: data.videos && data.videos.length > 0 ? data.videos : null,
-        videoThumbnail:
-          data.videos && data.videos.length > 0
-            ? data.videos.map((v) => videoThumbnailsRef.current[v]).find(Boolean) ?? null
-            : null,
         description: emptyStringToNull(data.description),
         catcafeStatus: emptyStringToNull<Cat['catcafeStatus']>(data.catcafeStatus),
         visible: data.visible ?? true,
@@ -299,16 +294,10 @@ export function CatsMutateDialog({
     form.reset()
   }
 
-  // 监听对话框打开/关闭：初始化或清理视频缩略图映射
+  // 监听对话框打开/关闭：关闭时重置表单状态
   useEffect(() => {
-    if (open) {
-      // 编辑模式回显时，把已有视频缩略图写入映射，保证提交不丢失
-      if (currentRow?.videoThumbnail && currentRow.videos?.length) {
-        videoThumbnailsRef.current[currentRow.videos[0]] = currentRow.videoThumbnail
-      }
-    } else {
+    if (!open) {
       form.reset()
-      videoThumbnailsRef.current = {}
       setAiFilledFields(new Set())
       setActiveTab('manual')
     }
@@ -362,7 +351,6 @@ export function CatsMutateDialog({
                 isLoadingStatuses={statusesQuery.isLoading}
                 apiStores={apiStores}
                 isLoadingStores={storesQuery.isLoading}
-                videoThumbnailsRef={videoThumbnailsRef}
               />
             </TabsContent>
           </Tabs>
@@ -383,7 +371,6 @@ export function CatsMutateDialog({
             isLoadingStatuses={statusesQuery.isLoading}
             apiStores={apiStores}
             isLoadingStores={storesQuery.isLoading}
-            videoThumbnailsRef={videoThumbnailsRef}
           />
         )}
 
@@ -457,7 +444,6 @@ function FormWrapper({
   isLoadingStatuses,
   apiStores,
   isLoadingStores,
-  videoThumbnailsRef,
 }: {
   form: ReturnType<typeof useForm<CatForm>>
   aiFilledFields: Set<string>
@@ -471,7 +457,6 @@ function FormWrapper({
   isLoadingStatuses?: boolean
   apiStores: Array<{ label: string; value: string }>
   isLoadingStores?: boolean
-  videoThumbnailsRef: RefObject<Record<string, string>>
 }) {
   const [showBreedDialog, setShowBreedDialog] = useState(false)
 
@@ -613,6 +598,7 @@ function FormWrapper({
                       maxCount={5}
                       uploadFn={async (files) => {
                         const results = await uploadService.uploadCatImages(files)
+                        // 返回 {url, thumbnailUrl}，由组件拼成 MediaItem 追加
                         return results
                           .filter((r) => r.success && r.originalUrl)
                           .map((r) => ({
@@ -638,9 +624,9 @@ function FormWrapper({
                       value={field.value}
                       onChange={field.onChange}
                       maxCount={5}
-                      thumbnailMapRef={videoThumbnailsRef}
                       uploadFn={async (files) => {
                         const results = await uploadService.uploadVideos(files)
+                        // 返回 {url, thumbnailUrl}（首帧），由组件拼成 MediaItem 追加
                         return results
                           .filter((r) => r.success && r.originalUrl)
                           .map((r) => ({
