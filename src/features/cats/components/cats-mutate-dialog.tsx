@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useState, useMemo, useEffect, useRef } from 'react'
+import { useState, useMemo, useEffect, useRef, type RefObject } from 'react'
 import { Sparkles, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { getTodayString } from '@/lib/utils'
@@ -70,6 +70,8 @@ export function CatsMutateDialog({
 }: CatMutateDialogProps) {
   const isUpdate = !!currentRow
   const continueAddingRef = useRef(false)
+  // 视频上传结果中 url → thumbnailUrl 的映射，提交时取首个缩略图赋给 videoThumbnail
+  const videoThumbnailsRef = useRef<Record<string, string>>({})
   const [activeTab, setActiveTab] = useState<'ai' | 'manual'>('manual')
   const [aiFilledFields, setAiFilledFields] = useState<Set<string>>(new Set())
   const [apiBreeds, setApiBreeds] = useState<Array<{ label: string; value: string }>>([])
@@ -202,7 +204,10 @@ export function CatsMutateDialog({
         images: data.images && data.images.length > 0 ? data.images : null,
         thumbnail: data.images && data.images.length > 0 ? data.images[0] : null,
         videos: data.videos && data.videos.length > 0 ? data.videos : null,
-        videoThumbnail: null,
+        videoThumbnail:
+          data.videos && data.videos.length > 0
+            ? data.videos.map((v) => videoThumbnailsRef.current[v]).find(Boolean) ?? null
+            : null,
         description: emptyStringToNull(data.description),
         catcafeStatus: emptyStringToNull<Cat['catcafeStatus']>(data.catcafeStatus),
         visible: data.visible ?? true,
@@ -304,14 +309,20 @@ export function CatsMutateDialog({
     form.reset()
   }
 
-  // 监听对话框关闭，重置状态
+  // 监听对话框打开/关闭：初始化或清理视频缩略图映射
   useEffect(() => {
-    if (!open) {
+    if (open) {
+      // 编辑模式回显时，把已有视频缩略图写入映射，保证提交不丢失
+      if (currentRow?.videoThumbnail && currentRow.videos?.length) {
+        videoThumbnailsRef.current[currentRow.videos[0]] = currentRow.videoThumbnail
+      }
+    } else {
       form.reset()
+      videoThumbnailsRef.current = {}
       setAiFilledFields(new Set())
       setActiveTab('manual')
     }
-  }, [open, form])
+  }, [open, form, currentRow])
 
   return (
     <Dialog
@@ -361,6 +372,7 @@ export function CatsMutateDialog({
                 isLoadingStatuses={isLoadingStatuses}
                 apiStores={apiStores}
                 isLoadingStores={isLoadingStores}
+                videoThumbnailsRef={videoThumbnailsRef}
               />
             </TabsContent>
           </Tabs>
@@ -381,6 +393,7 @@ export function CatsMutateDialog({
             isLoadingStatuses={isLoadingStatuses}
             apiStores={apiStores}
             isLoadingStores={isLoadingStores}
+            videoThumbnailsRef={videoThumbnailsRef}
           />
         )}
 
@@ -454,6 +467,7 @@ function FormWrapper({
   isLoadingStatuses,
   apiStores,
   isLoadingStores,
+  videoThumbnailsRef,
 }: {
   form: ReturnType<typeof useForm<CatForm>>
   aiFilledFields: Set<string>
@@ -467,6 +481,7 @@ function FormWrapper({
   isLoadingStatuses?: boolean
   apiStores: Array<{ label: string; value: string }>
   isLoadingStores?: boolean
+  videoThumbnailsRef: RefObject<Record<string, string>>
 }) {
   const [showBreedDialog, setShowBreedDialog] = useState(false)
 
@@ -635,12 +650,16 @@ function FormWrapper({
                       maxCount={5}
                       uploadFn={async (files) => {
                         const results = await uploadService.uploadVideos(files)
-                        return results
+                        const mapped = results
                           .filter((r) => r.success && r.originalUrl)
                           .map((r) => ({
                             url: r.originalUrl as string,
                             thumbnailUrl: r.thumbnailUrl,
                           }))
+                        mapped.forEach((r) => {
+                          if (r.thumbnailUrl) videoThumbnailsRef.current[r.url] = r.thumbnailUrl
+                        })
+                        return mapped
                       }}
                     />
                   </FormControl>

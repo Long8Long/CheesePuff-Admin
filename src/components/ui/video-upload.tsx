@@ -37,6 +37,8 @@ export function VideoUpload({
 }: VideoUploadProps) {
   const [isDragging, setIsDragging] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
+  // video URL → thumbnail URL 缩略图映射，仅供预览展示，不随 value 持久化
+  const [thumbnailMap, setThumbnailMap] = useState<Record<string, string>>({})
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleUpload = async (files: File[]) => {
@@ -52,6 +54,16 @@ export function VideoUpload({
       if (uploadFn) {
         const results = await uploadFn(filesToUpload)
         const newUrls = results.map((r) => r.url)
+        // 收集缩略图映射，供预览渲染使用
+        const newThumbs: Record<string, string> = {}
+        results.forEach((r) => {
+          if (r.thumbnailUrl) {
+            newThumbs[r.url] = r.thumbnailUrl
+          }
+        })
+        if (Object.keys(newThumbs).length > 0) {
+          setThumbnailMap((prev) => ({ ...prev, ...newThumbs }))
+        }
         if (newUrls.length > 0) {
           onChange([...value, ...newUrls])
         }
@@ -148,23 +160,35 @@ export function VideoUpload({
 
       {value.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-2">
-          {value.map((_url, index) => (
-            <div
-              key={index}
-              className="group relative flex h-20 w-20 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg border bg-muted"
-            >
-              <Video className="h-6 w-6 text-muted-foreground" />
-              {!disabled && !isUploading && (
-                <button
-                  type="button"
-                  onClick={() => handleRemove(index)}
-                  className="absolute right-1 top-1 rounded-full bg-black/70 p-0.5 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-black/90"
-                >
-                  <X className="h-3 w-3" />
-                </button>
-              )}
-            </div>
-          ))}
+          {value.map((url, index) => {
+            const thumb = thumbnailMap[url]
+            return (
+              <div
+                key={index}
+                className="group relative flex h-20 w-20 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg border bg-muted"
+              >
+                {thumb ? (
+                  <img
+                    src={thumb}
+                    alt={`视频预览 ${index + 1}`}
+                    className="h-full w-full object-cover"
+                    loading="lazy"
+                  />
+                ) : (
+                  <Video className="h-6 w-6 text-muted-foreground" />
+                )}
+                {!disabled && !isUploading && (
+                  <button
+                    type="button"
+                    onClick={() => handleRemove(index)}
+                    className="absolute right-1 top-1 rounded-full bg-black/70 p-0.5 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-black/90"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                )}
+              </div>
+            )
+          })}
         </div>
       )}
     </div>
