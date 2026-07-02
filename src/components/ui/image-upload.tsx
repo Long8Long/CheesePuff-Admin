@@ -50,7 +50,7 @@ export function ImageUpload({
   }
 
   const validateFile = (file: File): boolean => {
-    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif']
     return validTypes.includes(file.type)
   }
 
@@ -59,7 +59,7 @@ export function ImageUpload({
     // Validate all files first
     const validFiles = files.filter((file) => {
       if (!validateFile(file)) {
-        alert(`文件 "${file.name}" 格式不支持，仅支持 JPG、PNG、WebP 格式`)
+        alert(`文件 "${file.name}" 格式不支持，仅支持 JPG、PNG、WebP、GIF 格式`)
         return false
       }
       return true
@@ -157,7 +157,7 @@ export function ImageUpload({
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/jpeg,image/jpg,image/png,image/webp"
+        accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
         multiple
         onChange={handleFileInputChange}
         className="hidden"
@@ -172,7 +172,7 @@ export function ImageUpload({
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           className={cn(
-            'flex h-24 w-full cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed px-2 py-3 transition-colors',
+            'flex min-h-32 w-full cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed px-2 py-3 transition-colors',
             isDragging
               ? 'border-primary bg-primary/5'
               : 'border-muted-foreground/25 hover:border-muted-foreground/50',
@@ -197,7 +197,7 @@ export function ImageUpload({
                 点击或拖拽上传
               </p>
               <p className="mt-1 text-xs text-muted-foreground">
-                支持 JPG、PNG、WebP 格式，最多 {maxCount} 张
+                支持 JPG、PNG、WebP、GIF 格式，最多 {maxCount} 张
               </p>
             </>
           )}

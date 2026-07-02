@@ -591,10 +591,10 @@ function FormWrapper({
             />
           </div>
 
-          {/* 图片 / 视频上传：并排两列。置于表单靠上位置，确保对话框打开时即处于可视区内 ——
+          {/* 图片 / 视频上传：各占整行。置于表单靠上位置，确保对话框打开时即处于可视区内 ——
               此前因位于表单末尾、内容超过 90vh，上传区被挤到折叠线之下，点击落到遮罩层，
               被 Radix 判为“外部点击”导致对话框误关闭、文件选择框无法弹出 */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4">
             <FormField
               control={form.control}
               name="images"

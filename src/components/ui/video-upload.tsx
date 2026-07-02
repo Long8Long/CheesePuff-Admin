@@ -114,7 +114,7 @@ export function VideoUpload({
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           className={cn(
-            'flex h-24 w-full cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed px-2 py-3 transition-colors',
+            'flex min-h-32 w-full cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed px-2 py-3 transition-colors',
             isDragging
               ? 'border-primary bg-primary/5'
               : 'border-muted-foreground/25 hover:border-muted-foreground/50',
