@@ -591,6 +591,65 @@ function FormWrapper({
             />
           </div>
 
+          {/* 图片 / 视频上传：并排两列。置于表单靠上位置，确保对话框打开时即处于可视区内 ——
+              此前因位于表单末尾、内容超过 90vh，上传区被挤到折叠线之下，点击落到遮罩层，
+              被 Radix 判为“外部点击”导致对话框误关闭、文件选择框无法弹出 */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <FormField
+              control={form.control}
+              name="images"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>图片</FormLabel>
+                  <FormControl>
+                    <ImageUpload
+                      value={field.value}
+                      onChange={field.onChange}
+                      maxCount={5}
+                      uploadFn={async (files) => {
+                        const results = await uploadService.uploadCatImages(files)
+                        return results
+                          .filter((r) => r.success && r.originalUrl)
+                          .map((r) => ({
+                            url: r.originalUrl as string,
+                            thumbnailUrl: r.thumbnailUrl || r.originalUrl || '',
+                          }))
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="videos"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>视频</FormLabel>
+                  <FormControl>
+                    <VideoUpload
+                      value={field.value}
+                      onChange={field.onChange}
+                      maxCount={5}
+                      uploadFn={async (files) => {
+                        const results = await uploadService.uploadVideos(files)
+                        return results
+                          .filter((r) => r.success && r.originalUrl)
+                          .map((r) => ({
+                            url: r.originalUrl as string,
+                            thumbnailUrl: r.thumbnailUrl,
+                          }))
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
           <FormField
             control={form.control}
             name="description"
@@ -651,59 +710,7 @@ function FormWrapper({
             </div>
           </div>
 
-          <FormField
-            control={form.control}
-            name="images"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>图片</FormLabel>
-                <FormControl>
-                  <ImageUpload
-                    value={field.value}
-                    onChange={field.onChange}
-                    maxCount={5}
-                    uploadFn={async (files) => {
-                      const results = await uploadService.uploadCatImages(files)
-                      return results
-                        .filter((r) => r.success && r.originalUrl)
-                        .map((r) => ({
-                          url: r.originalUrl as string,
-                          thumbnailUrl: r.thumbnailUrl || r.originalUrl || '',
-                        }))
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="videos"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>视频</FormLabel>
-                <FormControl>
-                  <VideoUpload
-                    value={field.value}
-                    onChange={field.onChange}
-                    maxCount={5}
-                    uploadFn={async (files) => {
-                      const results = await uploadService.uploadVideos(files)
-                      return results
-                        .filter((r) => r.success && r.originalUrl)
-                        .map((r) => ({
-                          url: r.originalUrl as string,
-                          thumbnailUrl: r.thumbnailUrl,
-                        }))
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {/* 图片 / 视频上传已移至表单靠上位置（价格字段之后），见上方 */}
         </form>
       </Form>
 
