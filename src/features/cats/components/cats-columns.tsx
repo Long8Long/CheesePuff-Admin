@@ -220,6 +220,9 @@ export const catsColumns: ColumnDef<Cat>[] = [
     id: 'actions',
     meta: {
       i18nKey: 'dataTable.cats.columns.actions',
+      className:
+        'sticky right-0 z-20 bg-background shadow-[-12px_0_8px_-8px_rgba(0,0,0,0.15)]',
+      thClassName: 'text-right',
     },
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='操作' />
