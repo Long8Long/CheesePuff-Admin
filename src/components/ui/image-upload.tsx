@@ -1,6 +1,22 @@
 import { useState, useRef } from 'react'
 import { Upload, X, Image as ImageIcon, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import {
+  DndContext,
+  DragEndEvent,
+  DragOverlay,
+  DragStartEvent,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  closestCenter,
+} from '@dnd-kit/core'
+import {
+  SortableContext,
+  useSortable,
+  rectSortingStrategy,
+  arrayMove,
+} from '@dnd-kit/sortable'
 
 export interface UploadResult {
   url: string
@@ -16,6 +32,55 @@ type ImageUploadProps = {
   maxCount?: number
 }
 
+/** Internal sortable thumbnail item for drag-and-drop reordering */
+function SortableImageThumbnail({
+  url,
+  index,
+  onRemove,
+  disabled,
+}: {
+  url: string
+  index: number
+  onRemove: (index: number) => void
+  disabled: boolean
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: url })
+
+  const style: React.CSSProperties = {
+    transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
+    transition: transition ?? undefined,
+    opacity: isDragging ? 0.5 : undefined,
+  }
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="relative group h-20 w-20 flex-shrink-0 cursor-grab overflow-hidden rounded-lg border active:cursor-grabbing"
+      {...attributes}
+      {...listeners}
+    >
+      <img
+        src={url}
+        alt={`Thumbnail ${index + 1}`}
+        className="h-full w-full object-cover"
+      />
+      {!disabled && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation()
+            onRemove(index)
+          }}
+          className="absolute right-1 top-1 rounded-full bg-black/70 p-0.5 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-black/90"
+        >
+          <X className="h-3 w-3" />
+        </button>
+      )}
+    </div>
+  )
+}
+
 /**
  * Image Upload Component
  *
@@ -24,8 +89,9 @@ type ImageUploadProps = {
  * - Click to select file
  * - Image preview with thumbnail support
  * - Remove image
+ * - Drag-and-drop sorting via @dnd-kit
  * - Custom upload function support
- * - File type validation (jpg, jpeg, png, webp)
+ * - File type validation (jpg, jpeg, png, webp, gif)
  */
 export function ImageUpload({
   value = [],
@@ -37,7 +103,33 @@ export function ImageUpload({
 }: ImageUploadProps) {
   const [isDragging, setIsDragging] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
+  const [isSorting, setIsSorting] = useState(false)
+  const [activeId, setActiveId] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 8 },
+    })
+  )
+
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(String(event.active.id))
+    setIsSorting(true)
+  }
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+    if (over && active.id !== over.id) {
+      const oldIndex = value.indexOf(String(active.id))
+      const newIndex = value.indexOf(String(over.id))
+      if (oldIndex !== -1 && newIndex !== -1) {
+        onChange(arrayMove(value, oldIndex, newIndex))
+      }
+    }
+    setActiveId(null)
+    setIsSorting(false)
+  }
 
   // Simulated upload API - Replace with real API later
   const simulateUpload = async (file: File): Promise<string> => {
@@ -115,7 +207,7 @@ export function ImageUpload({
     e.preventDefault()
     setIsDragging(false)
 
-    if (disabled || isUploading) return
+    if (disabled || isUploading || isSorting) return
 
     const files = Array.from(e.dataTransfer.files)
     handleBatchUpload(files)
@@ -123,7 +215,7 @@ export function ImageUpload({
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault()
-    if (!disabled && !isUploading) {
+    if (!disabled && !isUploading && !isSorting) {
       setIsDragging(true)
     }
   }
@@ -133,7 +225,7 @@ export function ImageUpload({
   }
 
   const handleClick = () => {
-    if (!disabled && !isUploading) {
+    if (!disabled && !isUploading && !isSorting) {
       fileInputRef.current?.click()
     }
   }
@@ -146,7 +238,7 @@ export function ImageUpload({
   }
 
   const handleRemove = (index: number) => {
-    if (!disabled && !isUploading) {
+    if (!disabled && !isUploading && !isSorting) {
       const newValue = value.filter((_, i) => i !== index)
       onChange(newValue)
     }
@@ -176,7 +268,7 @@ export function ImageUpload({
             isDragging
               ? 'border-primary bg-primary/5'
               : 'border-muted-foreground/25 hover:border-muted-foreground/50',
-            (disabled || isUploading) && 'cursor-not-allowed opacity-50'
+            (disabled || isUploading || isSorting) && 'cursor-not-allowed opacity-50'
           )}
         >
           {isUploading ? (
@@ -204,30 +296,40 @@ export function ImageUpload({
         </div>
       )}
 
-      {/* Thumbnail previews - below upload area */}
+      {/* Thumbnail previews with drag-and-drop sorting */}
       {value.length > 0 && (
-        <div className="mt-3 flex flex-wrap gap-2">
-          {value.map((url, index) => (
-            <div
-              key={index}
-              className="relative group h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg border"
-            >
-              <img
-                src={url}
-                alt={`Thumbnail ${index + 1}`}
-                className="h-full w-full object-cover"
-              />
-              {!disabled && !isUploading && (
-                <button
-                  type="button"
-                  onClick={() => handleRemove(index)}
-                  className="absolute right-1 top-1 rounded-full bg-black/70 p-0.5 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-black/90"
-                >
-                  <X className="h-3 w-3" />
-                </button>
-              )}
-            </div>
-          ))}
+        <div className="mt-3">
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext items={value} strategy={rectSortingStrategy}>
+              <div className="flex flex-wrap gap-2">
+                {value.map((url, index) => (
+                  <SortableImageThumbnail
+                    key={url}
+                    url={url}
+                    index={index}
+                    onRemove={handleRemove}
+                    disabled={disabled || isUploading || isSorting}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+            <DragOverlay>
+              {activeId ? (
+                <div className="h-20 w-20 overflow-hidden rounded-lg border shadow-lg">
+                  <img
+                    src={activeId}
+                    alt=""
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+              ) : null}
+            </DragOverlay>
+          </DndContext>
         </div>
       )}
     </div>
