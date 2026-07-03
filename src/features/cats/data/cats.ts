@@ -60,11 +60,12 @@ function generateCat(id: number): Cat {
   const birthday = randomBirthday()
   const price = faker.number.int({ min: 500, max: 10000 })
 
-  // 生成 1-3 张图片
+  // 生成 1-3 张图片（配对结构：原图绑定缩略图）
   const imageCount = faker.number.int({ min: 1, max: 3 })
-  const images = Array.from({ length: imageCount }, (_, i) =>
-    generateCatImage(idStr, i)
-  )
+  const images = Array.from({ length: imageCount }, (_, i) => ({
+    url: generateCatImage(idStr, i),
+    thumbnail: generateCatImage(idStr, i),
+  }))
 
   return {
     id: idStr,
@@ -74,7 +75,7 @@ function generateCat(id: number): Cat {
     birthday,
     price,
     images,
-    thumbnail: images[0],
+    videos: null,
     description: faker.helpers.arrayElement(descriptions),
     catcafeStatus: faker.helpers.arrayElement([
       '工作中',

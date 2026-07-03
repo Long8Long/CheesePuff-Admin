@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import { Upload, X, Image as ImageIcon, Loader2 } from 'lucide-react'
+import { Upload, X, Video, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import {
   DndContext,
@@ -19,8 +19,8 @@ import {
 } from '@dnd-kit/sortable'
 
 /**
- * 配对媒体项：原图/视频与其缩略图原子绑定。
- * thumbnail 为缩略图（图片缩略图 / 视频首帧），历史数据可能为 null，渲染时降级用 url。
+ * 配对媒体项：视频与其缩略图（首帧）原子绑定。
+ * thumbnail 为视频首帧，历史数据可能为 null，渲染时降级用占位图标。
  * 本类型与 features/cats/models 的 MediaItem 结构一致，为保持共享 UI 与业务层解耦在此独立声明。
  */
 export interface MediaItem {
@@ -28,22 +28,22 @@ export interface MediaItem {
   thumbnail: string | null
 }
 
-export interface UploadResult {
+export interface VideoUploadResult {
   url: string
   thumbnailUrl: string | null
 }
 
-type ImageUploadProps = {
+type VideoUploadProps = {
   value?: MediaItem[]
   onChange: (items: MediaItem[]) => void
-  uploadFn?: (files: File[]) => Promise<UploadResult[]>
+  uploadFn?: (files: File[]) => Promise<VideoUploadResult[]>
   disabled?: boolean
   className?: string
   maxCount?: number
 }
 
-/** Internal sortable thumbnail item for drag-and-drop reordering */
-function SortableImageThumbnail({
+/** Internal sortable video thumbnail item for drag-and-drop reordering */
+function SortableVideoThumbnail({
   item,
   index,
   onRemove,
@@ -55,8 +55,6 @@ function SortableImageThumbnail({
   disabled: boolean
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.url })
-  // 历史数据兼容：thumbnail 可能为 null，降级用原图
-  const previewSrc = item.thumbnail ?? item.url
 
   const style: React.CSSProperties = {
     transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
@@ -68,15 +66,20 @@ function SortableImageThumbnail({
     <div
       ref={setNodeRef}
       style={style}
-      className="relative group h-20 w-20 flex-shrink-0 cursor-grab overflow-hidden rounded-lg border active:cursor-grabbing"
+      className="relative group flex h-20 w-20 flex-shrink-0 cursor-grab items-center justify-center overflow-hidden rounded-lg border bg-muted active:cursor-grabbing"
       {...attributes}
       {...listeners}
     >
-      <img
-        src={previewSrc}
-        alt={`Thumbnail ${index + 1}`}
-        className="h-full w-full object-cover"
-      />
+      {item.thumbnail ? (
+        <img
+          src={item.thumbnail}
+          alt={`视频预览 ${index + 1}`}
+          className="h-full w-full object-cover"
+          loading="lazy"
+        />
+      ) : (
+        <Video className="h-6 w-6 text-muted-foreground" />
+      )}
       {!disabled && (
         <button
           type="button"
@@ -94,27 +97,27 @@ function SortableImageThumbnail({
 }
 
 /**
- * Image Upload Component
+ * Video Upload Component / 视频上传组件
  *
  * Features:
  * - Drag and drop upload
  * - Click to select file
- * - Image preview with thumbnail support
- * - Remove image
- * - Drag-and-drop sorting via @dnd-kit (缩略图作为对象属性随原图整体移动)
- * - Custom upload function support
- * - File type validation (jpg, jpeg, png, webp, gif)
+ * - Thumbnail preview with fallback icon
+ * - Remove video
+ * - Drag-and-drop sorting via @dnd-kit (缩略图作为对象属性随视频整体移动)
+ * - File type validation (mp4, mov, avi, mkv, webm, flv, wmv)
+ * - Size limit 100MB per file
  *
- * 值为 MediaItem[]：每个原图原子绑定自己的缩略图，重排/删除时整对象操作。
+ * 值为 MediaItem[]：每个视频原子绑定自己的缩略图，重排/删除时整对象操作。
  */
-export function ImageUpload({
+export function VideoUpload({
   value = [],
   onChange,
   uploadFn,
   disabled = false,
   className,
   maxCount = 5,
-}: ImageUploadProps) {
+}: VideoUploadProps) {
   const [isDragging, setIsDragging] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const [isSorting, setIsSorting] = useState(false)
@@ -146,69 +149,31 @@ export function ImageUpload({
     setIsSorting(false)
   }
 
-  // Simulated upload API - Replace with real API later
-  const simulateUpload = async (file: File): Promise<MediaItem> => {
-    // Simulate network delay
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+  const handleUpload = async (files: File[]) => {
+    if (files.length === 0) return
 
-    // Create object URL for preview (in real app, this would be the URL returned from API)
-    const url = URL.createObjectURL(file)
-    return { url, thumbnail: null }
-  }
-
-  const validateFile = (file: File): boolean => {
-    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif']
-    return validTypes.includes(file.type)
-  }
-
-  // Handle batch upload of multiple files
-  const handleBatchUpload = async (files: File[]) => {
-    // Validate all files first
-    const validFiles = files.filter((file) => {
-      if (!validateFile(file)) {
-        alert(`文件 "${file.name}" 格式不支持，仅支持 JPG、PNG、WebP、GIF 格式`)
-        return false
-      }
-      return true
-    })
-
-    if (validFiles.length === 0) return
-
-    // Check max count
     const availableSlots = maxCount - value.length
-    if (availableSlots <= 0) {
-      alert(`最多只能上传 ${maxCount} 张图片`)
-      return
-    }
+    if (availableSlots <= 0) return
 
-    const filesToUpload = validFiles.slice(0, availableSlots)
-    if (validFiles.length > availableSlots) {
-      alert(`只能再上传 ${availableSlots} 张图片，已忽略多余的 ${validFiles.length - availableSlots} 个文件`)
-    }
+    const filesToUpload = files.slice(0, availableSlots)
 
     setIsUploading(true)
     try {
-      let newItems: MediaItem[] = []
-
       if (uploadFn) {
-        // 上传结果拼成 MediaItem：original_url → url，thumbnail_url → thumbnail
         const results = await uploadFn(filesToUpload)
-        newItems = results
+        // 上传结果拼成 MediaItem：original_url → url，thumbnail_url → thumbnail（首帧）
+        const newItems: MediaItem[] = results
           .filter((r) => r.url)
           .map((r) => ({ url: r.url, thumbnail: r.thumbnailUrl ?? null }))
-      } else {
-        // Fallback to simulated upload (still batch for consistency)
-        newItems = await Promise.all(
-          filesToUpload.map(async (file) => simulateUpload(file))
-        )
-      }
-
-      if (newItems.length > 0) {
-        onChange([...value, ...newItems])
+        if (newItems.length > 0) {
+          onChange([...value, ...newItems])
+        }
       }
     } catch (error) {
-      console.error('Upload failed:', error)
-      alert('图片上传失败，请重试')
+      // Error handling is done in the service layer with specific messages
+      if (error instanceof Error && error.message !== '没有可上传的有效视频文件') {
+        // Service-level errors are already toasted, only re-throw unexpected ones
+      }
     } finally {
       setIsUploading(false)
     }
@@ -217,42 +182,30 @@ export function ImageUpload({
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault()
     setIsDragging(false)
-
     if (disabled || isUploading || isSorting) return
-
-    const files = Array.from(e.dataTransfer.files)
-    handleBatchUpload(files)
+    handleUpload(Array.from(e.dataTransfer.files))
   }
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault()
-    if (!disabled && !isUploading && !isSorting) {
-      setIsDragging(true)
-    }
+    if (!disabled && !isUploading && !isSorting) setIsDragging(true)
   }
 
-  const handleDragLeave = () => {
-    setIsDragging(false)
-  }
+  const handleDragLeave = () => setIsDragging(false)
 
   const handleClick = () => {
-    if (!disabled && !isUploading && !isSorting) {
-      fileInputRef.current?.click()
-    }
+    if (!disabled && !isUploading && !isSorting) fileInputRef.current?.click()
   }
 
-  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || [])
-    handleBatchUpload(files)
-    // Reset input value to allow selecting the same file again
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    handleUpload(Array.from(e.target.files || []))
     e.target.value = ''
   }
 
   const handleRemove = (index: number) => {
     if (!disabled && !isUploading && !isSorting) {
-      // 从数组移除对应对象，thumbnail 随之移除
-      const newValue = value.filter((_, i) => i !== index)
-      onChange(newValue)
+      // 从数组移除对应对象，缩略图随之移除
+      onChange(value.filter((_, i) => i !== index))
     }
   }
 
@@ -264,9 +217,9 @@ export function ImageUpload({
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+        accept="video/mp4,video/quicktime,video/x-msvideo,video/x-matroska,video/webm,video/x-flv,video/x-ms-wmv"
         multiple
-        onChange={handleFileInputChange}
+        onChange={handleFileChange}
         className="hidden"
         disabled={disabled}
       />
@@ -278,7 +231,6 @@ export function ImageUpload({
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
-        {/* Upload area - always visible (only show when not reaching max) */}
         {value.length < maxCount && (
           <div
             onClick={handleClick}
@@ -304,27 +256,26 @@ export function ImageUpload({
                   {isDragging ? (
                     <Upload className="h-6 w-6 text-muted-foreground" />
                   ) : (
-                    <ImageIcon className="h-6 w-6 text-muted-foreground" />
+                    <Video className="h-6 w-6 text-muted-foreground" />
                   )}
                 </div>
                 <p className="mt-2 text-sm font-medium text-foreground">
-                  点击或拖拽上传
+                  点击或拖拽上传视频
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  支持 JPG、PNG、WebP、GIF 格式，最多 {maxCount} 张
+                  支持 MP4、MOV、AVI、MKV、WebM 格式，单文件 ≤100MB，最多 {maxCount} 个
                 </p>
               </>
             )}
           </div>
         )}
 
-        {/* Thumbnail previews with drag-and-drop sorting */}
         {value.length > 0 && (
           <div className="mt-3">
             <SortableContext items={value.map((i) => i.url)} strategy={rectSortingStrategy}>
               <div className="flex flex-wrap gap-2">
                 {value.map((item, index) => (
-                  <SortableImageThumbnail
+                  <SortableVideoThumbnail
                     key={item.url}
                     item={item}
                     index={index}
@@ -336,12 +287,16 @@ export function ImageUpload({
             </SortableContext>
             <DragOverlay>
               {activeItem ? (
-                <div className="h-20 w-20 overflow-hidden rounded-lg border shadow-lg">
-                  <img
-                    src={activeItem.thumbnail ?? activeItem.url}
-                    alt=""
-                    className="h-full w-full object-cover"
-                  />
+                <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-lg border bg-muted shadow-lg">
+                  {activeItem.thumbnail ? (
+                    <img
+                      src={activeItem.thumbnail}
+                      alt=""
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <Video className="h-6 w-6 text-muted-foreground" />
+                  )}
                 </div>
               ) : null}
             </DragOverlay>

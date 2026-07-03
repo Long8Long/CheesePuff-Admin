@@ -2,6 +2,15 @@ import { z } from 'zod'
 import type { Cat, CatCafeStatus, Store } from '../models'
 
 /**
+ * Media item schema / 媒体资源 schema
+ * url 为原图/视频地址，thumbnail 为缩略图/视频首帧（历史数据可能为 null）
+ */
+export const mediaItemSchema = z.object({
+  url: z.string(),
+  thumbnail: z.string().nullable(),
+})
+
+/**
  * Zod schema for Cat validation
  * Cat 验证的 Zod schema
  */
@@ -15,8 +24,8 @@ export const catSchema = z.object({
     .regex(/^\d{4}-\d{2}-\d{2}$/, '日期格式错误，应为 YYYY-MM-DD')
     .nullish(),
   price: z.number().positive('价格必须大于0').nullish(),
-  images: z.array(z.string()).nullish(),
-  thumbnail: z.string().nullish(),
+  images: z.array(mediaItemSchema).nullish(),
+  videos: z.array(mediaItemSchema).nullish(),
   description: z.string().nullish(),
   catcafeStatus: z.string().nullish(),
   visible: z.boolean().default(true),

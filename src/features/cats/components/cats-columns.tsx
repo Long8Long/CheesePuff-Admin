@@ -67,7 +67,7 @@ export const catsColumns: ColumnDef<Cat>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: 'thumbnail',
+    id: 'thumbnail',
     meta: {
       i18nKey: 'dataTable.cats.columns.thumbnail',
     },
@@ -75,7 +75,9 @@ export const catsColumns: ColumnDef<Cat>[] = [
       <DataTableColumnHeader column={column} title='照片' />
     ),
     cell: ({ row }) => {
-      const thumbnail = row.getValue('thumbnail') as string
+      // 配对结构：取第一张图的缩略图，历史数据 thumbnail 为 null 时降级用原图
+      const firstImage = row.original.images?.[0]
+      const thumbnail = firstImage ? (firstImage.thumbnail ?? firstImage.url) : null
       return (
         <div className='size-12 overflow-hidden rounded-md bg-muted'>
           {thumbnail ? (
@@ -220,6 +222,9 @@ export const catsColumns: ColumnDef<Cat>[] = [
     id: 'actions',
     meta: {
       i18nKey: 'dataTable.cats.columns.actions',
+      className:
+        'sticky right-0 z-20 bg-background shadow-[-12px_0_8px_-8px_rgba(0,0,0,0.15)]',
+      thClassName: 'text-right',
     },
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='操作' />

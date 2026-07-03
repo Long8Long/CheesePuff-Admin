@@ -27,6 +27,17 @@ export type CatCafeStatus =
 export type Store = string
 
 /**
+ * Media item / 媒体资源
+ *
+ * 原图/视频与其缩略图原子绑定，拖拽重排时缩略图随对象自动跟随，避免错位。
+ * `thumbnail` 为图片缩略图 / 视频首帧；历史数据可能为 null，渲染时需降级用 url。
+ */
+export interface MediaItem {
+  url: string
+  thumbnail: string | null
+}
+
+/**
  * Cat entity / 猫咪实体
  *
  * This is the core Cat type used throughout the application
@@ -39,8 +50,8 @@ export interface Cat {
   storeName: Store | null
   birthday: string | null
   price: number | null
-  images: string[] | null
-  thumbnail: string | null
+  images: MediaItem[] | null
+  videos: MediaItem[] | null
   description: string | null | undefined
   catcafeStatus: CatCafeStatus | null | undefined
   visible: boolean

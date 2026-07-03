@@ -24,8 +24,12 @@ import { Route as authOtpRouteImport } from './routes/(auth)/otp'
 import { Route as authForgotPasswordRouteImport } from './routes/(auth)/forgot-password'
 import { Route as ClerkAuthenticatedRouteRouteImport } from './routes/clerk/_authenticated/route'
 import { Route as ClerkauthRouteRouteImport } from './routes/clerk/(auth)/route'
+import { Route as AuthenticatedStatisticsRouteRouteImport } from './routes/_authenticated/statistics/route'
 import { Route as AuthenticatedSettingsRouteRouteImport } from './routes/_authenticated/settings/route'
+import { Route as AuthenticatedInventoryRouteRouteImport } from './routes/_authenticated/inventory/route'
+import { Route as AuthenticatedFinancialRouteRouteImport } from './routes/_authenticated/financial/route'
 import { Route as AuthenticatedCatsRouteRouteImport } from './routes/_authenticated/cats/route'
+import { Route as AuthenticatedBreedingRouteRouteImport } from './routes/_authenticated/breeding/route'
 import { Route as AuthenticatedUsersIndexRouteImport } from './routes/_authenticated/users/index'
 import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authenticated/settings/index'
 import { Route as AuthenticatedHelpCenterIndexRouteImport } from './routes/_authenticated/help-center/index'
@@ -114,10 +118,28 @@ const ClerkauthRouteRoute = ClerkauthRouteRouteImport.update({
   id: '/(auth)',
   getParentRoute: () => ClerkRouteRoute,
 } as any)
+const AuthenticatedStatisticsRouteRoute =
+  AuthenticatedStatisticsRouteRouteImport.update({
+    id: '/statistics',
+    path: '/statistics',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedSettingsRouteRoute =
   AuthenticatedSettingsRouteRouteImport.update({
     id: '/settings',
     path: '/settings',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedInventoryRouteRoute =
+  AuthenticatedInventoryRouteRouteImport.update({
+    id: '/inventory',
+    path: '/inventory',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedFinancialRouteRoute =
+  AuthenticatedFinancialRouteRouteImport.update({
+    id: '/financial',
+    path: '/financial',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedCatsRouteRoute = AuthenticatedCatsRouteRouteImport.update({
@@ -125,6 +147,12 @@ const AuthenticatedCatsRouteRoute = AuthenticatedCatsRouteRouteImport.update({
   path: '/cats',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedBreedingRouteRoute =
+  AuthenticatedBreedingRouteRouteImport.update({
+    id: '/breeding',
+    path: '/breeding',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedUsersIndexRoute = AuthenticatedUsersIndexRouteImport.update({
   id: '/users/',
   path: '/users/',
@@ -212,10 +240,13 @@ const AuthenticatedErrorsErrorRoute =
   } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof AuthenticatedIndexRoute
   '/clerk': typeof ClerkAuthenticatedRouteRouteWithChildren
+  '/breeding': typeof AuthenticatedBreedingRouteRoute
   '/cats': typeof AuthenticatedCatsRouteRoute
+  '/financial': typeof AuthenticatedFinancialRouteRoute
+  '/inventory': typeof AuthenticatedInventoryRouteRoute
   '/settings': typeof AuthenticatedSettingsRouteRouteWithChildren
+  '/statistics': typeof AuthenticatedStatisticsRouteRoute
   '/forgot-password': typeof authForgotPasswordRoute
   '/otp': typeof authOtpRoute
   '/sign-in': typeof authSignInRoute
@@ -226,6 +257,7 @@ export interface FileRoutesByFullPath {
   '/404': typeof errors404Route
   '/500': typeof errors500Route
   '/503': typeof errors503Route
+  '/': typeof AuthenticatedIndexRoute
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/settings/account': typeof AuthenticatedSettingsAccountRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
@@ -236,15 +268,19 @@ export interface FileRoutesByFullPath {
   '/clerk/sign-in': typeof ClerkauthSignInRoute
   '/clerk/sign-up': typeof ClerkauthSignUpRoute
   '/clerk/user-management': typeof ClerkAuthenticatedUserManagementRoute
-  '/apps/': typeof AuthenticatedAppsIndexRoute
-  '/chats/': typeof AuthenticatedChatsIndexRoute
-  '/help-center/': typeof AuthenticatedHelpCenterIndexRoute
+  '/apps': typeof AuthenticatedAppsIndexRoute
+  '/chats': typeof AuthenticatedChatsIndexRoute
+  '/help-center': typeof AuthenticatedHelpCenterIndexRoute
   '/settings/': typeof AuthenticatedSettingsIndexRoute
-  '/users/': typeof AuthenticatedUsersIndexRoute
+  '/users': typeof AuthenticatedUsersIndexRoute
 }
 export interface FileRoutesByTo {
   '/clerk': typeof ClerkAuthenticatedRouteRouteWithChildren
+  '/breeding': typeof AuthenticatedBreedingRouteRoute
   '/cats': typeof AuthenticatedCatsRouteRoute
+  '/financial': typeof AuthenticatedFinancialRouteRoute
+  '/inventory': typeof AuthenticatedInventoryRouteRoute
+  '/statistics': typeof AuthenticatedStatisticsRouteRoute
   '/forgot-password': typeof authForgotPasswordRoute
   '/otp': typeof authOtpRoute
   '/sign-in': typeof authSignInRoute
@@ -276,8 +312,12 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/clerk': typeof ClerkRouteRouteWithChildren
+  '/_authenticated/breeding': typeof AuthenticatedBreedingRouteRoute
   '/_authenticated/cats': typeof AuthenticatedCatsRouteRoute
+  '/_authenticated/financial': typeof AuthenticatedFinancialRouteRoute
+  '/_authenticated/inventory': typeof AuthenticatedInventoryRouteRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRouteRouteWithChildren
+  '/_authenticated/statistics': typeof AuthenticatedStatisticsRouteRoute
   '/clerk/(auth)': typeof ClerkauthRouteRouteWithChildren
   '/clerk/_authenticated': typeof ClerkAuthenticatedRouteRouteWithChildren
   '/(auth)/forgot-password': typeof authForgotPasswordRoute
@@ -310,10 +350,13 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | '/'
     | '/clerk'
+    | '/breeding'
     | '/cats'
+    | '/financial'
+    | '/inventory'
     | '/settings'
+    | '/statistics'
     | '/forgot-password'
     | '/otp'
     | '/sign-in'
@@ -324,6 +367,7 @@ export interface FileRouteTypes {
     | '/404'
     | '/500'
     | '/503'
+    | '/'
     | '/errors/$error'
     | '/settings/account'
     | '/settings/appearance'
@@ -334,15 +378,19 @@ export interface FileRouteTypes {
     | '/clerk/sign-in'
     | '/clerk/sign-up'
     | '/clerk/user-management'
-    | '/apps/'
-    | '/chats/'
-    | '/help-center/'
+    | '/apps'
+    | '/chats'
+    | '/help-center'
     | '/settings/'
-    | '/users/'
+    | '/users'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/clerk'
+    | '/breeding'
     | '/cats'
+    | '/financial'
+    | '/inventory'
+    | '/statistics'
     | '/forgot-password'
     | '/otp'
     | '/sign-in'
@@ -373,8 +421,12 @@ export interface FileRouteTypes {
     | '__root__'
     | '/_authenticated'
     | '/clerk'
+    | '/_authenticated/breeding'
     | '/_authenticated/cats'
+    | '/_authenticated/financial'
+    | '/_authenticated/inventory'
     | '/_authenticated/settings'
+    | '/_authenticated/statistics'
     | '/clerk/(auth)'
     | '/clerk/_authenticated'
     | '/(auth)/forgot-password'
@@ -432,7 +484,7 @@ declare module '@tanstack/react-router' {
     '/_authenticated': {
       id: '/_authenticated'
       path: ''
-      fullPath: '/'
+      fullPath: ''
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
@@ -527,11 +579,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClerkauthRouteRouteImport
       parentRoute: typeof ClerkRouteRoute
     }
+    '/_authenticated/statistics': {
+      id: '/_authenticated/statistics'
+      path: '/statistics'
+      fullPath: '/statistics'
+      preLoaderRoute: typeof AuthenticatedStatisticsRouteRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/settings': {
       id: '/_authenticated/settings'
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof AuthenticatedSettingsRouteRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/inventory': {
+      id: '/_authenticated/inventory'
+      path: '/inventory'
+      fullPath: '/inventory'
+      preLoaderRoute: typeof AuthenticatedInventoryRouteRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/financial': {
+      id: '/_authenticated/financial'
+      path: '/financial'
+      fullPath: '/financial'
+      preLoaderRoute: typeof AuthenticatedFinancialRouteRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/cats': {
@@ -541,10 +614,17 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCatsRouteRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/breeding': {
+      id: '/_authenticated/breeding'
+      path: '/breeding'
+      fullPath: '/breeding'
+      preLoaderRoute: typeof AuthenticatedBreedingRouteRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/users/': {
       id: '/_authenticated/users/'
       path: '/users'
-      fullPath: '/users/'
+      fullPath: '/users'
       preLoaderRoute: typeof AuthenticatedUsersIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
@@ -558,21 +638,21 @@ declare module '@tanstack/react-router' {
     '/_authenticated/help-center/': {
       id: '/_authenticated/help-center/'
       path: '/help-center'
-      fullPath: '/help-center/'
+      fullPath: '/help-center'
       preLoaderRoute: typeof AuthenticatedHelpCenterIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/chats/': {
       id: '/_authenticated/chats/'
       path: '/chats'
-      fullPath: '/chats/'
+      fullPath: '/chats'
       preLoaderRoute: typeof AuthenticatedChatsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/apps/': {
       id: '/_authenticated/apps/'
       path: '/apps'
-      fullPath: '/apps/'
+      fullPath: '/apps'
       preLoaderRoute: typeof AuthenticatedAppsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
@@ -679,8 +759,12 @@ const AuthenticatedSettingsRouteRouteWithChildren =
   )
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedBreedingRouteRoute: typeof AuthenticatedBreedingRouteRoute
   AuthenticatedCatsRouteRoute: typeof AuthenticatedCatsRouteRoute
+  AuthenticatedFinancialRouteRoute: typeof AuthenticatedFinancialRouteRoute
+  AuthenticatedInventoryRouteRoute: typeof AuthenticatedInventoryRouteRoute
   AuthenticatedSettingsRouteRoute: typeof AuthenticatedSettingsRouteRouteWithChildren
+  AuthenticatedStatisticsRouteRoute: typeof AuthenticatedStatisticsRouteRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedErrorsErrorRoute: typeof AuthenticatedErrorsErrorRoute
   AuthenticatedAppsIndexRoute: typeof AuthenticatedAppsIndexRoute
@@ -690,8 +774,12 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedBreedingRouteRoute: AuthenticatedBreedingRouteRoute,
   AuthenticatedCatsRouteRoute: AuthenticatedCatsRouteRoute,
+  AuthenticatedFinancialRouteRoute: AuthenticatedFinancialRouteRoute,
+  AuthenticatedInventoryRouteRoute: AuthenticatedInventoryRouteRoute,
   AuthenticatedSettingsRouteRoute: AuthenticatedSettingsRouteRouteWithChildren,
+  AuthenticatedStatisticsRouteRoute: AuthenticatedStatisticsRouteRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedErrorsErrorRoute: AuthenticatedErrorsErrorRoute,
   AuthenticatedAppsIndexRoute: AuthenticatedAppsIndexRoute,

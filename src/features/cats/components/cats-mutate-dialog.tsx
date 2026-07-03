@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState, useMemo, useEffect, useRef } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { Sparkles, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { getTodayString } from '@/lib/utils'
@@ -19,6 +20,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { ImageUpload } from '@/components/ui/image-upload'
+import { VideoUpload } from '@/components/ui/video-upload'
 import {
   Dialog,
   DialogContent,
@@ -27,10 +29,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { ConfirmDialog } from '@/components/confirm-dialog'
 import { SelectDropdown } from '@/components/select-dropdown'
 import { BreedCombobox } from './breed-combobox'
 import type { Cat, CatCreate, CatUpdate } from '../models'
 import type { CatAIOutput } from '../data/ai-schema'
+import { mediaItemSchema } from '../data/schema'
 import { catsService } from '../services/cats.service'
 import { uploadService } from '../services/uploads.service'
 import { CatsAIFillTab } from './cats-ai-fill-tab'
@@ -51,7 +55,9 @@ const formSchema = z.object({
   storeName: z.string().optional(),
   birthday: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, '日期格式错误'),
   price: z.string().optional(),
-  images: z.array(z.string()).optional(),
+  // 配对结构：原图/视频与其缩略图原子绑定，与 Cat.images/Cat.videos 结构一致
+  images: z.array(mediaItemSchema).optional(),
+  videos: z.array(mediaItemSchema).optional(),
   description: z.string().optional(),
   catcafeStatus: z.string().min(1, '请选择工作状态'),
   visible: z.boolean().optional(),
@@ -69,61 +75,51 @@ export function CatsMutateDialog({
   const continueAddingRef = useRef(false)
   const [activeTab, setActiveTab] = useState<'ai' | 'manual'>('manual')
   const [aiFilledFields, setAiFilledFields] = useState<Set<string>>(new Set())
-  const [apiBreeds, setApiBreeds] = useState<Array<{ label: string; value: string }>>([])
-  const [apiStatuses, setApiStatuses] = useState<Array<{ label: string; value: string }>>([])
-  const [apiStores, setApiStores] = useState<Array<{ label: string; value: string }>>([])
   const [customBreeds, setCustomBreeds] = useState<Array<{ label: string; value: string }>>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isLoadingBreeds, setIsLoadingBreeds] = useState(true)
-  const [isLoadingStatuses, setIsLoadingStatuses] = useState(true)
-  const [isLoadingStores, setIsLoadingStores] = useState(true)
+  const [confirmClose, setConfirmClose] = useState(false)
 
-  // Fetch breeds, statuses and stores from API on component mount
-  useEffect(() => {
-    const fetchConfigData = async () => {
-      try {
-        setIsLoadingBreeds(true)
-        setIsLoadingStatuses(true)
-        setIsLoadingStores(true)
+  // 使用 TanStack Query 获取配置数据，自动处理缓存和去重
+  const breedsQuery = useQuery({
+    queryKey: ['config', 'cat_breeds'],
+    queryFn: () => configsService.getByKey('cat_breeds'),
+  })
 
-        // Fetch breeds
-        const breedsResponse = await configsService.getByKey('cat_breeds')
-        const breedValues = breedsResponse.value as string[]
-        const breeds = breedValues.map((breed) => ({
-          label: breed,
-          value: breed,
-        }))
-        setApiBreeds(breeds)
+  const statusesQuery = useQuery({
+    queryKey: ['config', 'cat_statuses'],
+    queryFn: () => configsService.getByKey('cat_statuses'),
+  })
 
-        // Fetch statuses
-        const statusesResponse = await configsService.getByKey('cat_statuses')
-        const statusValues = statusesResponse.value as string[]
-        const statuses = statusValues.map((status) => ({
-          label: status,
-          value: status,
-        }))
-        setApiStatuses(statuses)
+  const storesQuery = useQuery({
+    queryKey: ['stores', 'active'],
+    queryFn: () => storesService.getList({ activeOnly: true }),
+  })
 
-        // Fetch stores
-        const storesResponse = await storesService.getList({ activeOnly: true })
-        const stores = storesResponse.stores
-          .filter((store) => store.isActive)
-          .map((store) => ({
-            label: store.name,
-            value: store.name,
-          }))
-        setApiStores(stores)
-      } catch {
-        toast.error('获取配置数据失败')
-      } finally {
-        setIsLoadingBreeds(false)
-        setIsLoadingStatuses(false)
-        setIsLoadingStores(false)
-      }
+  // 从 query 数据中转换格式
+  const apiBreeds = useMemo(() => {
+    if (breedsQuery.data?.value) {
+      const breedValues = breedsQuery.data.value as string[]
+      return breedValues.map((breed) => ({ label: breed, value: breed }))
     }
+    return []
+  }, [breedsQuery.data])
 
-    fetchConfigData()
-  }, [])
+  const apiStatuses = useMemo(() => {
+    if (statusesQuery.data?.value) {
+      const statusValues = statusesQuery.data.value as string[]
+      return statusValues.map((status) => ({ label: status, value: status }))
+    }
+    return []
+  }, [statusesQuery.data])
+
+  const apiStores = useMemo(() => {
+    if (storesQuery.data?.stores) {
+      return storesQuery.data.stores
+        .filter((store) => store.isActive)
+        .map((store) => ({ label: store.name, value: store.name }))
+    }
+    return []
+  }, [storesQuery.data])
 
   // 合并API品种和自定义品种
   const breeds = useMemo(() => {
@@ -157,6 +153,7 @@ export function CatsMutateDialog({
           birthday: currentRow.birthday ?? undefined,
           price: String(currentRow.price ?? ''),
           images: currentRow.images ?? [],
+          videos: currentRow.videos ?? [],
           description: currentRow.description ?? '',
           catcafeStatus: currentRow.catcafeStatus ?? undefined,
           visible: currentRow.visible,
@@ -168,6 +165,7 @@ export function CatsMutateDialog({
           birthday: getTodayString(),
           price: '',
           images: [],
+          videos: [],
           description: '',
           catcafeStatus: defaultStatus || undefined,
           visible: true,
@@ -186,7 +184,7 @@ export function CatsMutateDialog({
         return value as T
       }
 
-      // 构建请求数据
+      // 构建请求数据（images/videos 为配对对象数组，缩略图随对象原子绑定）
       const requestData: CatCreate | CatUpdate = {
         name: emptyStringToNull(data.name),
         breed: data.breed,
@@ -194,7 +192,7 @@ export function CatsMutateDialog({
         birthday: data.birthday,
         price: data.price ? Number.parseFloat(data.price) : null,
         images: data.images && data.images.length > 0 ? data.images : null,
-        thumbnail: data.images && data.images.length > 0 ? data.images[0] : null,
+        videos: data.videos && data.videos.length > 0 ? data.videos : null,
         description: emptyStringToNull(data.description),
         catcafeStatus: emptyStringToNull<Cat['catcafeStatus']>(data.catcafeStatus),
         visible: data.visible ?? true,
@@ -222,6 +220,7 @@ export function CatsMutateDialog({
           birthday: getTodayString(),
           price: '',
           images: [],
+          videos: [],
           description: '',
           catcafeStatus: defaultStatus || undefined,
           visible: true,
@@ -281,24 +280,37 @@ export function CatsMutateDialog({
     setActiveTab('manual') // 切换到手动填写 Tab 查看结果
   }
 
+  // 用户主动关闭表单时，若有未保存改动（含已上传的图片/视频）先弹确认框，避免误关丢失
+  const handleCloseRequest = () => {
+    if (form.formState.isDirty) {
+      setConfirmClose(true)
+    } else {
+      onOpenChange(false)
+    }
+  }
+
   const handleResetAI = () => {
     setAiFilledFields(new Set())
     form.reset()
   }
 
-  // 监听对话框关闭，重置状态
+  // 监听对话框打开/关闭：关闭时重置表单状态
   useEffect(() => {
     if (!open) {
       form.reset()
       setAiFilledFields(new Set())
       setActiveTab('manual')
     }
-  }, [open, form])
+  }, [open, form, currentRow])
 
   return (
     <Dialog
       open={open}
-      onOpenChange={onOpenChange}
+      onOpenChange={(next) => {
+        // 关闭请求（next=false）经拦截器判断是否弹确认；打开请求直接透传
+        if (!next) handleCloseRequest()
+        else onOpenChange(next)
+      }}
     >
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
@@ -334,11 +346,11 @@ export function CatsMutateDialog({
                 onSubmit={onSubmit}
                 breeds={breeds}
                 onAddBreed={handleAddBreed}
-                isLoadingBreeds={isLoadingBreeds}
+                isLoadingBreeds={breedsQuery.isLoading}
                 apiStatuses={apiStatuses}
-                isLoadingStatuses={isLoadingStatuses}
+                isLoadingStatuses={statusesQuery.isLoading}
                 apiStores={apiStores}
-                isLoadingStores={isLoadingStores}
+                isLoadingStores={storesQuery.isLoading}
               />
             </TabsContent>
           </Tabs>
@@ -354,18 +366,18 @@ export function CatsMutateDialog({
             onSubmit={onSubmit}
             breeds={breeds}
             onAddBreed={handleAddBreed}
-            isLoadingBreeds={isLoadingBreeds}
+            isLoadingBreeds={breedsQuery.isLoading}
             apiStatuses={apiStatuses}
-            isLoadingStatuses={isLoadingStatuses}
+            isLoadingStatuses={statusesQuery.isLoading}
             apiStores={apiStores}
-            isLoadingStores={isLoadingStores}
+            isLoadingStores={storesQuery.isLoading}
           />
         )}
 
         {/* Dialog Footer - 只在编辑模式或手动填写 Tab 时显示 */}
         {(isUpdate || activeTab === 'manual') && (
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
+            <Button variant="outline" onClick={handleCloseRequest} disabled={isSubmitting}>
               取消
             </Button>
             {!isUpdate && (
@@ -400,6 +412,20 @@ export function CatsMutateDialog({
           </DialogFooter>
         )}
       </DialogContent>
+      {/* 放弃未保存更改（含已上传的图片/视频）的确认框 */}
+      <ConfirmDialog
+        open={confirmClose}
+        onOpenChange={setConfirmClose}
+        destructive
+        title="放弃更改?"
+        desc="您有未保存的更改（含已上传的图片/视频），关闭后这些内容将丢失，已上传文件需重新上传。确定放弃吗？"
+        confirmText="放弃"
+        cancelBtnText="继续编辑"
+        handleConfirm={() => {
+          setConfirmClose(false)
+          onOpenChange(false) // 真正关闭；随后既有 useEffect[!open] 会 form.reset()
+        }}
+      />
     </Dialog>
   )
 }
@@ -555,6 +581,67 @@ function FormWrapper({
             />
           </div>
 
+          {/* 图片 / 视频上传：各占整行。置于表单靠上位置，确保对话框打开时即处于可视区内 ——
+              此前因位于表单末尾、内容超过 90vh，上传区被挤到折叠线之下，点击落到遮罩层，
+              被 Radix 判为“外部点击”导致对话框误关闭、文件选择框无法弹出 */}
+          <div className="grid grid-cols-1 gap-4">
+            <FormField
+              control={form.control}
+              name="images"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>图片</FormLabel>
+                  <FormControl>
+                    <ImageUpload
+                      value={field.value}
+                      onChange={field.onChange}
+                      maxCount={5}
+                      uploadFn={async (files) => {
+                        const results = await uploadService.uploadCatImages(files)
+                        // 返回 {url, thumbnailUrl}，由组件拼成 MediaItem 追加
+                        return results
+                          .filter((r) => r.success && r.originalUrl)
+                          .map((r) => ({
+                            url: r.originalUrl as string,
+                            thumbnailUrl: r.thumbnailUrl || r.originalUrl || '',
+                          }))
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="videos"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>视频</FormLabel>
+                  <FormControl>
+                    <VideoUpload
+                      value={field.value}
+                      onChange={field.onChange}
+                      maxCount={5}
+                      uploadFn={async (files) => {
+                        const results = await uploadService.uploadVideos(files)
+                        // 返回 {url, thumbnailUrl}（首帧），由组件拼成 MediaItem 追加
+                        return results
+                          .filter((r) => r.success && r.originalUrl)
+                          .map((r) => ({
+                            url: r.originalUrl as string,
+                            thumbnailUrl: r.thumbnailUrl,
+                          }))
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
           <FormField
             control={form.control}
             name="description"
@@ -615,32 +702,7 @@ function FormWrapper({
             </div>
           </div>
 
-          <FormField
-            control={form.control}
-            name="images"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>图片</FormLabel>
-                <FormControl>
-                  <ImageUpload
-                    value={field.value}
-                    onChange={field.onChange}
-                    maxCount={5}
-                    uploadFn={async (files) => {
-                      const results = await uploadService.uploadCatImages(files)
-                      return results
-                        .filter((r) => r.success && r.originalUrl)
-                        .map((r) => ({
-                          url: r.originalUrl as string,
-                          thumbnailUrl: r.thumbnailUrl || r.originalUrl || '',
-                        }))
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {/* 图片 / 视频上传已移至表单靠上位置（价格字段之后），见上方 */}
         </form>
       </Form>
 

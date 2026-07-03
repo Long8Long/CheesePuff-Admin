@@ -30,3 +30,6 @@ dist-pkg
 *.njsproj
 *.sln
 *.sw?
+
+# 视频测试文件
+*.mp4
