@@ -228,7 +228,8 @@ export function CatsMutateDialog({
         setAiFilledFields(new Set())
       } else {
         onOpenChange(false)
-        form.reset()
+        // 不调 form.reset()——Dialog 关闭有动画过渡，此时重置会导致表单数值闪回原始值。
+        // Dialog 关闭后内容从 DOM 卸载，下次打开时 useForm 会重新初始化。
         setAiFilledFields(new Set())
       }
     } catch (error) {
@@ -294,12 +295,15 @@ export function CatsMutateDialog({
     form.reset()
   }
 
-  // 监听对话框打开/关闭：关闭时重置表单状态
+  // 监听对话框打开/关闭：关闭后延迟重置表单状态，避免关闭动画期间闪现原始值
   useEffect(() => {
     if (!open) {
-      form.reset()
-      setAiFilledFields(new Set())
+      const timer = setTimeout(() => {
+        form.reset()
+        setAiFilledFields(new Set())
+      }, 300)
       setActiveTab('manual')
+      return () => clearTimeout(timer)
     }
   }, [open, form, currentRow])
 

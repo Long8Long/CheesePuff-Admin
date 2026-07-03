@@ -2,6 +2,15 @@ import { useState, useRef } from 'react'
 import { Upload, X, Image as ImageIcon, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import {
   DndContext,
   DragEndEvent,
   DragOverlay,
@@ -84,7 +93,7 @@ function SortableImageThumbnail({
             e.stopPropagation()
             onRemove(index)
           }}
-          className="absolute right-1 top-1 rounded-full bg-black/70 p-0.5 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-black/90"
+          className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white hover:bg-black/80"
         >
           <X className="h-3 w-3" />
         </button>
@@ -119,6 +128,7 @@ export function ImageUpload({
   const [isUploading, setIsUploading] = useState(false)
   const [isSorting, setIsSorting] = useState(false)
   const [activeId, setActiveId] = useState<string | null>(null)
+  const [pendingRemoveIndex, setPendingRemoveIndex] = useState<number | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const sensors = useSensors(
@@ -328,7 +338,7 @@ export function ImageUpload({
                     key={item.url}
                     item={item}
                     index={index}
-                    onRemove={handleRemove}
+                    onRemove={setPendingRemoveIndex}
                     disabled={disabled || isUploading || isSorting}
                   />
                 ))}
@@ -348,6 +358,34 @@ export function ImageUpload({
           </div>
         )}
       </DndContext>
+
+      {/* 删除确认对话框 */}
+      <AlertDialog
+        open={pendingRemoveIndex !== null}
+        onOpenChange={(open) => {
+          if (!open) setPendingRemoveIndex(null)
+        }}
+      >
+        <AlertDialogContent className="max-w-xs">
+          <AlertDialogHeader>
+            <AlertDialogTitle>确认删除这张图片？</AlertDialogTitle>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-row gap-2 sm:flex-row">
+            <AlertDialogCancel className="flex-1">取消</AlertDialogCancel>
+            <AlertDialogAction
+              className="flex-1"
+              onClick={() => {
+                if (pendingRemoveIndex !== null) {
+                  handleRemove(pendingRemoveIndex)
+                  setPendingRemoveIndex(null)
+                }
+              }}
+            >
+              删除
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
