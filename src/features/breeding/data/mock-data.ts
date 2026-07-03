@@ -15,7 +15,10 @@ export const breedingStatuses = [
 ]
 
 // 状态颜色映射
-export const statusColorMap = {
+export const statusColorMap: Record<
+  'mating' | 'pregnant' | 'born' | 'cancelled',
+  string
+> = {
   mating: 'bg-blue-100/30 text-blue-900 dark:text-blue-200 border-blue-200',
   pregnant: 'bg-pink-100/30 text-pink-900 dark:text-pink-200 border-pink-200',
   born: 'bg-green-100/30 text-green-900 dark:text-green-200 border-green-200',
@@ -109,8 +112,23 @@ export const breedingKanbanData = {
   ],
 }
 
+type BreedingStatus = 'mating' | 'pregnant' | 'born' | 'cancelled'
+
+interface BreedingRecord {
+  id: string
+  queenId: string
+  queenName: string
+  kingId: string
+  kingName: string
+  matingDate: string
+  dueDate: string
+  birthDate: string | null
+  kittenCount: number | null
+  status: BreedingStatus
+}
+
 // 育种记录数据
-export const breedingRecords = [
+export const breedingRecords: BreedingRecord[] = [
   {
     id: 'B001',
     queenId: 'C001',

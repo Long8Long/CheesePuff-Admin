@@ -31,7 +31,7 @@ export function IncomeExpenseChart() {
             <XAxis dataKey='month' />
             <YAxis />
             <Tooltip
-              formatter={(value: number) => `¥${value.toLocaleString()}`}
+              formatter={(value) => `¥${Number(value).toLocaleString()}`}
             />
             <Legend />
             <Line
