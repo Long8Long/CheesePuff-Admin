@@ -5,8 +5,14 @@ export const storeTypeEnum = z.enum(['main', 'branch'], {
 })
 
 export const storeLocationSchema = z.object({
-  latitude: z.number(),
-  longitude: z.number(),
+  latitude: z
+    .number({ message: '纬度需为数字' })
+    .min(-90, '纬度范围为 -90 ~ 90')
+    .max(90, '纬度范围为 -90 ~ 90'),
+  longitude: z
+    .number({ message: '经度需为数字' })
+    .min(-180, '经度范围为 -180 ~ 180')
+    .max(180, '经度范围为 -180 ~ 180'),
 })
 
 export const storeFormSchema = z.object({

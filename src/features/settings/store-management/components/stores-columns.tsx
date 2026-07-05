@@ -5,6 +5,12 @@ import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
 import type { Store } from '../models/store.types'
 
+// 格式化经纬度，保留 6 位小数
+function formatCoord(value: number | undefined | null): string {
+  if (value === null || value === undefined || Number.isNaN(value)) return '-'
+  return value.toFixed(6)
+}
+
 export const storesColumns: ColumnDef<Store>[] = [
   {
     accessorKey: 'name',
@@ -95,6 +101,25 @@ export const storesColumns: ColumnDef<Store>[] = [
     enableHiding: true,
   },
   {
+    accessorKey: 'location',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="经纬度" />
+    ),
+    cell: ({ row }) => {
+      const location = row.getValue('location') as Store['location'] | null
+      if (!location) {
+        return <div className="max-w-[180px] truncate text-muted-foreground">-</div>
+      }
+      return (
+        <div className="max-w-[180px] truncate text-xs text-muted-foreground tabular-nums">
+          {formatCoord(location.longitude)}, {formatCoord(location.latitude)}
+        </div>
+      )
+    },
+    enableSorting: false,
+    enableHiding: true,
+  },
+  {
     accessorKey: 'businessHours',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="营业时间" />
@@ -120,6 +145,11 @@ export const storesColumns: ColumnDef<Store>[] = [
   },
   {
     id: 'actions',
+    meta: {
+      className:
+        'sticky right-0 z-20 bg-background shadow-[-12px_0_8px_-8px_rgba(0,0,0,0.15)]',
+      thClassName: 'text-right',
+    },
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="操作" />
     ),
