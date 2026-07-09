@@ -92,36 +92,28 @@ function SortableVideoThumbnail({
       ) : (
         <Video className='h-6 w-6 text-muted-foreground' />
       )}
-      {/* 居中播放图标，提示可预览 */}
-      {!disabled && (
-        <span className='pointer-events-none absolute inset-0 flex items-center justify-center'>
-          <span className='flex h-7 w-7 items-center justify-center rounded-full bg-black/50 text-white opacity-0 transition-opacity group-hover:opacity-100'>
-            <Play className='h-3.5 w-3.5 fill-current' />
-          </span>
-        </span>
-      )}
       {!disabled && (
         <>
-          {/* 预览按钮：左上角，hover 显示 */}
+          {/* 预览按钮：左上角，始终可见（与图片一致，移动端无 hover） */}
           <button
             type='button'
             onClick={(e) => {
               e.stopPropagation()
               onPreview(index)
             }}
-            className='absolute top-1 left-1 rounded-full bg-black/70 p-0.5 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-black/90'
+            className='absolute top-1 left-1 rounded-full bg-black/60 p-1 text-white transition-colors hover:bg-black/80'
             aria-label='预览视频'
           >
             <Play className='h-3 w-3 fill-current' />
           </button>
-          {/* 删除按钮：右上角，hover 显示 */}
+          {/* 删除按钮：右上角，始终可见（与图片一致，移动端无 hover） */}
           <button
             type='button'
             onClick={(e) => {
               e.stopPropagation()
               onRemove(index)
             }}
-            className='absolute top-1 right-1 rounded-full bg-black/70 p-0.5 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-black/90'
+            className='absolute top-1 right-1 rounded-full bg-black/60 p-1 text-white hover:bg-black/80'
           >
             <X className='h-3 w-3' />
           </button>
