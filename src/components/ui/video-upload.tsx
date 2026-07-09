@@ -234,6 +234,7 @@ export function VideoUpload({
     if (!disabled && !isUploading && !isSorting) {
       // 从数组移除对应对象，缩略图随之移除
       onChange(value.filter((_, i) => i !== index))
+      toast.success('删除成功，请及时保存')
     }
   }
 
