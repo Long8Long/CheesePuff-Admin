@@ -52,6 +52,10 @@ export interface Cat {
   price: number | null
   images: MediaItem[] | null
   videos: MediaItem[] | null
+  /**
+   * 身份卡图片（小程序详情页展示，当前限 1 张，结构预留多张） / ID card image
+   */
+  idCardImage: MediaItem[] | null
   description: string | null | undefined
   catcafeStatus: CatCafeStatus | null | undefined
   visible: boolean

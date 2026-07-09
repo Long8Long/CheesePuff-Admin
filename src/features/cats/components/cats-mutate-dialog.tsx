@@ -58,6 +58,8 @@ const formSchema = z.object({
   // 配对结构：原图/视频与其缩略图原子绑定，与 Cat.images/Cat.videos 结构一致
   images: z.array(mediaItemSchema).optional(),
   videos: z.array(mediaItemSchema).optional(),
+  // 身份卡图片（小程序详情页展示，当前限 1 张，结构预留多张）
+  idCardImage: z.array(mediaItemSchema).optional(),
   description: z.string().optional(),
   catcafeStatus: z.string().min(1, '请选择工作状态'),
   visible: z.boolean().optional(),
@@ -154,6 +156,7 @@ export function CatsMutateDialog({
           price: String(currentRow.price ?? ''),
           images: currentRow.images ?? [],
           videos: currentRow.videos ?? [],
+          idCardImage: currentRow.idCardImage ?? [],
           description: currentRow.description ?? '',
           catcafeStatus: currentRow.catcafeStatus ?? undefined,
           visible: currentRow.visible,
@@ -166,6 +169,7 @@ export function CatsMutateDialog({
           price: '',
           images: [],
           videos: [],
+          idCardImage: [],
           description: '',
           catcafeStatus: defaultStatus || undefined,
           visible: true,
@@ -193,6 +197,7 @@ export function CatsMutateDialog({
         price: data.price ? Number.parseFloat(data.price) : null,
         images: data.images && data.images.length > 0 ? data.images : null,
         videos: data.videos && data.videos.length > 0 ? data.videos : null,
+        idCardImage: data.idCardImage && data.idCardImage.length > 0 ? data.idCardImage : null,
         description: emptyStringToNull(data.description),
         catcafeStatus: emptyStringToNull<Cat['catcafeStatus']>(data.catcafeStatus),
         visible: data.visible ?? true,
@@ -221,6 +226,7 @@ export function CatsMutateDialog({
           price: '',
           images: [],
           videos: [],
+          idCardImage: [],
           description: '',
           catcafeStatus: defaultStatus || undefined,
           visible: true,
@@ -636,6 +642,34 @@ function FormWrapper({
                           .map((r) => ({
                             url: r.originalUrl as string,
                             thumbnailUrl: r.thumbnailUrl,
+                          }))
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* 身份卡：小程序详情页展示，单张，复用图片上传（数组结构预留多张） */}
+            <FormField
+              control={form.control}
+              name="idCardImage"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>身份卡</FormLabel>
+                  <FormControl>
+                    <ImageUpload
+                      value={field.value}
+                      onChange={field.onChange}
+                      maxCount={1}
+                      uploadFn={async (files) => {
+                        const results = await uploadService.uploadCatImages(files)
+                        return results
+                          .filter((r) => r.success && r.originalUrl)
+                          .map((r) => ({
+                            url: r.originalUrl as string,
+                            thumbnailUrl: r.thumbnailUrl || r.originalUrl || '',
                           }))
                       }}
                     />

@@ -1,6 +1,4 @@
 import { useState, useRef } from 'react'
-import { Upload, X, Video, Loader2 } from 'lucide-react'
-import { cn } from '@/lib/utils'
 import {
   DndContext,
   DragEndEvent,
@@ -17,6 +15,9 @@ import {
   rectSortingStrategy,
   arrayMove,
 } from '@dnd-kit/sortable'
+import { Upload, X, Video, Loader2, Play } from 'lucide-react'
+import { cn } from '@/lib/utils'
+import { MediaPreviewDialog } from '@/components/ui/media-preview-dialog'
 
 /**
  * 配对媒体项：视频与其缩略图（首帧）原子绑定。
@@ -47,17 +48,28 @@ function SortableVideoThumbnail({
   item,
   index,
   onRemove,
+  onPreview,
   disabled,
 }: {
   item: MediaItem
   index: number
   onRemove: (index: number) => void
+  onPreview: (index: number) => void
   disabled: boolean
 }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.url })
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: item.url })
 
   const style: React.CSSProperties = {
-    transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
+    transform: transform
+      ? `translate3d(${transform.x}px, ${transform.y}px, 0)`
+      : undefined,
     transition: transition ?? undefined,
     opacity: isDragging ? 0.5 : undefined,
   }
@@ -66,7 +78,7 @@ function SortableVideoThumbnail({
     <div
       ref={setNodeRef}
       style={style}
-      className="relative group flex h-20 w-20 flex-shrink-0 cursor-grab items-center justify-center overflow-hidden rounded-lg border bg-muted active:cursor-grabbing"
+      className='group relative flex h-20 w-20 flex-shrink-0 cursor-grab items-center justify-center overflow-hidden rounded-lg border bg-muted active:cursor-grabbing'
       {...attributes}
       {...listeners}
     >
@@ -74,23 +86,46 @@ function SortableVideoThumbnail({
         <img
           src={item.thumbnail}
           alt={`视频预览 ${index + 1}`}
-          className="h-full w-full object-cover"
-          loading="lazy"
+          className='h-full w-full object-cover'
+          loading='lazy'
         />
       ) : (
-        <Video className="h-6 w-6 text-muted-foreground" />
+        <Video className='h-6 w-6 text-muted-foreground' />
+      )}
+      {/* 居中播放图标，提示可预览 */}
+      {!disabled && (
+        <span className='pointer-events-none absolute inset-0 flex items-center justify-center'>
+          <span className='flex h-7 w-7 items-center justify-center rounded-full bg-black/50 text-white opacity-0 transition-opacity group-hover:opacity-100'>
+            <Play className='h-3.5 w-3.5 fill-current' />
+          </span>
+        </span>
       )}
       {!disabled && (
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation()
-            onRemove(index)
-          }}
-          className="absolute right-1 top-1 rounded-full bg-black/70 p-0.5 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-black/90"
-        >
-          <X className="h-3 w-3" />
-        </button>
+        <>
+          {/* 预览按钮：左上角，hover 显示 */}
+          <button
+            type='button'
+            onClick={(e) => {
+              e.stopPropagation()
+              onPreview(index)
+            }}
+            className='absolute top-1 left-1 rounded-full bg-black/70 p-0.5 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-black/90'
+            aria-label='预览视频'
+          >
+            <Play className='h-3 w-3 fill-current' />
+          </button>
+          {/* 删除按钮：右上角，hover 显示 */}
+          <button
+            type='button'
+            onClick={(e) => {
+              e.stopPropagation()
+              onRemove(index)
+            }}
+            className='absolute top-1 right-1 rounded-full bg-black/70 p-0.5 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-black/90'
+          >
+            <X className='h-3 w-3' />
+          </button>
+        </>
       )}
     </div>
   )
@@ -122,6 +157,7 @@ export function VideoUpload({
   const [isUploading, setIsUploading] = useState(false)
   const [isSorting, setIsSorting] = useState(false)
   const [activeId, setActiveId] = useState<string | null>(null)
+  const [previewIndex, setPreviewIndex] = useState<number | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const sensors = useSensors(
@@ -171,7 +207,10 @@ export function VideoUpload({
       }
     } catch (error) {
       // Error handling is done in the service layer with specific messages
-      if (error instanceof Error && error.message !== '没有可上传的有效视频文件') {
+      if (
+        error instanceof Error &&
+        error.message !== '没有可上传的有效视频文件'
+      ) {
         // Service-level errors are already toasted, only re-throw unexpected ones
       }
     } finally {
@@ -216,11 +255,11 @@ export function VideoUpload({
     <div className={cn('w-full', className)}>
       <input
         ref={fileInputRef}
-        type="file"
-        accept="video/mp4,video/quicktime,video/x-msvideo,video/x-matroska,video/webm,video/x-flv,video/x-ms-wmv"
+        type='file'
+        accept='video/mp4,video/quicktime,video/x-msvideo,video/x-matroska,video/webm,video/x-flv,video/x-ms-wmv'
         multiple
         onChange={handleFileChange}
-        className="hidden"
+        className='hidden'
         disabled={disabled}
       />
 
@@ -242,28 +281,30 @@ export function VideoUpload({
               isDragging
                 ? 'border-primary bg-primary/5'
                 : 'border-muted-foreground/25 hover:border-muted-foreground/50',
-              (disabled || isUploading || isSorting) && 'cursor-not-allowed opacity-50'
+              (disabled || isUploading || isSorting) &&
+                'cursor-not-allowed opacity-50'
             )}
           >
             {isUploading ? (
               <>
-                <Loader2 className="h-10 w-10 animate-spin text-muted-foreground" />
-                <p className="mt-2 text-sm text-muted-foreground">上传中...</p>
+                <Loader2 className='h-10 w-10 animate-spin text-muted-foreground' />
+                <p className='mt-2 text-sm text-muted-foreground'>上传中...</p>
               </>
             ) : (
               <>
-                <div className="rounded-full bg-muted p-3">
+                <div className='rounded-full bg-muted p-3'>
                   {isDragging ? (
-                    <Upload className="h-6 w-6 text-muted-foreground" />
+                    <Upload className='h-6 w-6 text-muted-foreground' />
                   ) : (
-                    <Video className="h-6 w-6 text-muted-foreground" />
+                    <Video className='h-6 w-6 text-muted-foreground' />
                   )}
                 </div>
-                <p className="mt-2 text-sm font-medium text-foreground">
+                <p className='mt-2 text-sm font-medium text-foreground'>
                   点击或拖拽上传视频
                 </p>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  支持 MP4、MOV、AVI、MKV、WebM 格式，单文件 ≤100MB，最多 {maxCount} 个
+                <p className='mt-1 text-xs text-muted-foreground'>
+                  支持 MP4、MOV、AVI、MKV、WebM 格式，单文件 ≤100MB，最多{' '}
+                  {maxCount} 个
                 </p>
               </>
             )}
@@ -271,15 +312,19 @@ export function VideoUpload({
         )}
 
         {value.length > 0 && (
-          <div className="mt-3">
-            <SortableContext items={value.map((i) => i.url)} strategy={rectSortingStrategy}>
-              <div className="flex flex-wrap gap-2">
+          <div className='mt-3'>
+            <SortableContext
+              items={value.map((i) => i.url)}
+              strategy={rectSortingStrategy}
+            >
+              <div className='flex flex-wrap gap-2'>
                 {value.map((item, index) => (
                   <SortableVideoThumbnail
                     key={item.url}
                     item={item}
                     index={index}
                     onRemove={handleRemove}
+                    onPreview={setPreviewIndex}
                     disabled={disabled || isUploading || isSorting}
                   />
                 ))}
@@ -287,15 +332,15 @@ export function VideoUpload({
             </SortableContext>
             <DragOverlay>
               {activeItem ? (
-                <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-lg border bg-muted shadow-lg">
+                <div className='flex h-20 w-20 items-center justify-center overflow-hidden rounded-lg border bg-muted shadow-lg'>
                   {activeItem.thumbnail ? (
                     <img
                       src={activeItem.thumbnail}
-                      alt=""
-                      className="h-full w-full object-cover"
+                      alt=''
+                      className='h-full w-full object-cover'
                     />
                   ) : (
-                    <Video className="h-6 w-6 text-muted-foreground" />
+                    <Video className='h-6 w-6 text-muted-foreground' />
                   )}
                 </div>
               ) : null}
@@ -303,6 +348,18 @@ export function VideoUpload({
           </div>
         )}
       </DndContext>
+
+      {/* 视频预览弹窗 */}
+      <MediaPreviewDialog
+        kind='video'
+        open={previewIndex !== null}
+        onOpenChange={(open) => {
+          if (!open) setPreviewIndex(null)
+        }}
+        items={value}
+        index={previewIndex ?? 0}
+        onIndexChange={setPreviewIndex}
+      />
     </div>
   )
 }
