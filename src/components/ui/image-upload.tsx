@@ -1,15 +1,4 @@
 import { useState, useRef } from 'react'
-import { Upload, X, Image as ImageIcon, Loader2 } from 'lucide-react'
-import { cn } from '@/lib/utils'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
 import {
   DndContext,
   DragEndEvent,
@@ -26,6 +15,18 @@ import {
   rectSortingStrategy,
   arrayMove,
 } from '@dnd-kit/sortable'
+import { Upload, X, Image as ImageIcon, Loader2, Maximize2 } from 'lucide-react'
+import { cn } from '@/lib/utils'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import { MediaPreviewDialog } from '@/components/ui/media-preview-dialog'
 
 /**
  * 配对媒体项：原图/视频与其缩略图原子绑定。
@@ -56,19 +57,30 @@ function SortableImageThumbnail({
   item,
   index,
   onRemove,
+  onPreview,
   disabled,
 }: {
   item: MediaItem
   index: number
   onRemove: (index: number) => void
+  onPreview: (index: number) => void
   disabled: boolean
 }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.url })
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: item.url })
   // 历史数据兼容：thumbnail 可能为 null，降级用原图
   const previewSrc = item.thumbnail ?? item.url
 
   const style: React.CSSProperties = {
-    transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
+    transform: transform
+      ? `translate3d(${transform.x}px, ${transform.y}px, 0)`
+      : undefined,
     transition: transition ?? undefined,
     opacity: isDragging ? 0.5 : undefined,
   }
@@ -77,26 +89,41 @@ function SortableImageThumbnail({
     <div
       ref={setNodeRef}
       style={style}
-      className="relative group h-20 w-20 flex-shrink-0 cursor-grab overflow-hidden rounded-lg border active:cursor-grabbing"
+      className='group relative h-20 w-20 flex-shrink-0 cursor-grab overflow-hidden rounded-lg border active:cursor-grabbing'
       {...attributes}
       {...listeners}
     >
       <img
         src={previewSrc}
         alt={`Thumbnail ${index + 1}`}
-        className="h-full w-full object-cover"
+        className='h-full w-full object-cover'
       />
       {!disabled && (
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation()
-            onRemove(index)
-          }}
-          className="absolute right-1 top-1 rounded-full bg-black/60 p-1 text-white hover:bg-black/80"
-        >
-          <X className="h-3 w-3" />
-        </button>
+        <>
+          {/* 预览按钮：左上角，始终可见 */}
+          <button
+            type='button'
+            onClick={(e) => {
+              e.stopPropagation()
+              onPreview(index)
+            }}
+            className='absolute top-1 left-1 rounded-full bg-black/60 p-1 text-white transition-colors hover:bg-black/80'
+            aria-label='预览'
+          >
+            <Maximize2 className='h-3 w-3' />
+          </button>
+          {/* 删除按钮：右上角，始终可见 */}
+          <button
+            type='button'
+            onClick={(e) => {
+              e.stopPropagation()
+              onRemove(index)
+            }}
+            className='absolute top-1 right-1 rounded-full bg-black/60 p-1 text-white hover:bg-black/80'
+          >
+            <X className='h-3 w-3' />
+          </button>
+        </>
       )}
     </div>
   )
@@ -128,7 +155,10 @@ export function ImageUpload({
   const [isUploading, setIsUploading] = useState(false)
   const [isSorting, setIsSorting] = useState(false)
   const [activeId, setActiveId] = useState<string | null>(null)
-  const [pendingRemoveIndex, setPendingRemoveIndex] = useState<number | null>(null)
+  const [pendingRemoveIndex, setPendingRemoveIndex] = useState<number | null>(
+    null
+  )
+  const [previewIndex, setPreviewIndex] = useState<number | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const sensors = useSensors(
@@ -167,7 +197,13 @@ export function ImageUpload({
   }
 
   const validateFile = (file: File): boolean => {
-    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif']
+    const validTypes = [
+      'image/jpeg',
+      'image/jpg',
+      'image/png',
+      'image/webp',
+      'image/gif',
+    ]
     return validTypes.includes(file.type)
   }
 
@@ -193,7 +229,9 @@ export function ImageUpload({
 
     const filesToUpload = validFiles.slice(0, availableSlots)
     if (validFiles.length > availableSlots) {
-      alert(`只能再上传 ${availableSlots} 张图片，已忽略多余的 ${validFiles.length - availableSlots} 个文件`)
+      alert(
+        `只能再上传 ${availableSlots} 张图片，已忽略多余的 ${validFiles.length - availableSlots} 个文件`
+      )
     }
 
     setIsUploading(true)
@@ -273,11 +311,11 @@ export function ImageUpload({
     <div className={cn('w-full', className)}>
       <input
         ref={fileInputRef}
-        type="file"
-        accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+        type='file'
+        accept='image/jpeg,image/jpg,image/png,image/webp,image/gif'
         multiple
         onChange={handleFileInputChange}
-        className="hidden"
+        className='hidden'
         disabled={disabled}
       />
 
@@ -300,27 +338,28 @@ export function ImageUpload({
               isDragging
                 ? 'border-primary bg-primary/5'
                 : 'border-muted-foreground/25 hover:border-muted-foreground/50',
-              (disabled || isUploading || isSorting) && 'cursor-not-allowed opacity-50'
+              (disabled || isUploading || isSorting) &&
+                'cursor-not-allowed opacity-50'
             )}
           >
             {isUploading ? (
               <>
-                <Loader2 className="h-10 w-10 animate-spin text-muted-foreground" />
-                <p className="mt-2 text-sm text-muted-foreground">上传中...</p>
+                <Loader2 className='h-10 w-10 animate-spin text-muted-foreground' />
+                <p className='mt-2 text-sm text-muted-foreground'>上传中...</p>
               </>
             ) : (
               <>
-                <div className="rounded-full bg-muted p-3">
+                <div className='rounded-full bg-muted p-3'>
                   {isDragging ? (
-                    <Upload className="h-6 w-6 text-muted-foreground" />
+                    <Upload className='h-6 w-6 text-muted-foreground' />
                   ) : (
-                    <ImageIcon className="h-6 w-6 text-muted-foreground" />
+                    <ImageIcon className='h-6 w-6 text-muted-foreground' />
                   )}
                 </div>
-                <p className="mt-2 text-sm font-medium text-foreground">
+                <p className='mt-2 text-sm font-medium text-foreground'>
                   点击或拖拽上传
                 </p>
-                <p className="mt-1 text-xs text-muted-foreground">
+                <p className='mt-1 text-xs text-muted-foreground'>
                   支持 JPG、PNG、WebP、GIF 格式，最多 {maxCount} 张
                 </p>
               </>
@@ -330,15 +369,19 @@ export function ImageUpload({
 
         {/* Thumbnail previews with drag-and-drop sorting */}
         {value.length > 0 && (
-          <div className="mt-3">
-            <SortableContext items={value.map((i) => i.url)} strategy={rectSortingStrategy}>
-              <div className="flex flex-wrap gap-2">
+          <div className='mt-3'>
+            <SortableContext
+              items={value.map((i) => i.url)}
+              strategy={rectSortingStrategy}
+            >
+              <div className='flex flex-wrap gap-2'>
                 {value.map((item, index) => (
                   <SortableImageThumbnail
                     key={item.url}
                     item={item}
                     index={index}
                     onRemove={setPendingRemoveIndex}
+                    onPreview={setPreviewIndex}
                     disabled={disabled || isUploading || isSorting}
                   />
                 ))}
@@ -346,11 +389,11 @@ export function ImageUpload({
             </SortableContext>
             <DragOverlay>
               {activeItem ? (
-                <div className="h-20 w-20 overflow-hidden rounded-lg border shadow-lg">
+                <div className='h-20 w-20 overflow-hidden rounded-lg border shadow-lg'>
                   <img
                     src={activeItem.thumbnail ?? activeItem.url}
-                    alt=""
-                    className="h-full w-full object-cover"
+                    alt=''
+                    className='h-full w-full object-cover'
                   />
                 </div>
               ) : null}
@@ -366,14 +409,14 @@ export function ImageUpload({
           if (!open) setPendingRemoveIndex(null)
         }}
       >
-        <AlertDialogContent className="max-w-xs">
+        <AlertDialogContent className='max-w-xs'>
           <AlertDialogHeader>
             <AlertDialogTitle>确认删除这张图片？</AlertDialogTitle>
           </AlertDialogHeader>
-          <AlertDialogFooter className="flex-row gap-2 sm:flex-row">
-            <AlertDialogCancel className="flex-1">取消</AlertDialogCancel>
+          <AlertDialogFooter className='flex-row gap-2 sm:flex-row'>
+            <AlertDialogCancel className='flex-1'>取消</AlertDialogCancel>
             <AlertDialogAction
-              className="flex-1"
+              className='flex-1'
               onClick={() => {
                 if (pendingRemoveIndex !== null) {
                   handleRemove(pendingRemoveIndex)
@@ -386,6 +429,18 @@ export function ImageUpload({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* 图片预览弹窗 */}
+      <MediaPreviewDialog
+        kind='image'
+        open={previewIndex !== null}
+        onOpenChange={(open) => {
+          if (!open) setPreviewIndex(null)
+        }}
+        items={value}
+        index={previewIndex ?? 0}
+        onIndexChange={setPreviewIndex}
+      />
     </div>
   )
 }
