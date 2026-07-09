@@ -16,6 +16,7 @@ import {
   arrayMove,
 } from '@dnd-kit/sortable'
 import { Upload, X, Video, Loader2, Play } from 'lucide-react'
+import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { MediaPreviewDialog } from '@/components/ui/media-preview-dialog'
 
@@ -92,36 +93,28 @@ function SortableVideoThumbnail({
       ) : (
         <Video className='h-6 w-6 text-muted-foreground' />
       )}
-      {/* 居中播放图标，提示可预览 */}
-      {!disabled && (
-        <span className='pointer-events-none absolute inset-0 flex items-center justify-center'>
-          <span className='flex h-7 w-7 items-center justify-center rounded-full bg-black/50 text-white opacity-0 transition-opacity group-hover:opacity-100'>
-            <Play className='h-3.5 w-3.5 fill-current' />
-          </span>
-        </span>
-      )}
       {!disabled && (
         <>
-          {/* 预览按钮：左上角，hover 显示 */}
+          {/* 预览按钮：左上角，始终可见（与图片一致，移动端无 hover） */}
           <button
             type='button'
             onClick={(e) => {
               e.stopPropagation()
               onPreview(index)
             }}
-            className='absolute top-1 left-1 rounded-full bg-black/70 p-0.5 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-black/90'
+            className='absolute top-1 left-1 rounded-full bg-black/60 p-1 text-white transition-colors hover:bg-black/80'
             aria-label='预览视频'
           >
             <Play className='h-3 w-3 fill-current' />
           </button>
-          {/* 删除按钮：右上角，hover 显示 */}
+          {/* 删除按钮：右上角，始终可见（与图片一致，移动端无 hover） */}
           <button
             type='button'
             onClick={(e) => {
               e.stopPropagation()
               onRemove(index)
             }}
-            className='absolute top-1 right-1 rounded-full bg-black/70 p-0.5 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-black/90'
+            className='absolute top-1 right-1 rounded-full bg-black/60 p-1 text-white hover:bg-black/80'
           >
             <X className='h-3 w-3' />
           </button>
@@ -203,16 +196,12 @@ export function VideoUpload({
           .map((r) => ({ url: r.url, thumbnail: r.thumbnailUrl ?? null }))
         if (newItems.length > 0) {
           onChange([...value, ...newItems])
+          toast.success('上传成功，请及时保存')
         }
       }
-    } catch (error) {
-      // Error handling is done in the service layer with specific messages
-      if (
-        error instanceof Error &&
-        error.message !== '没有可上传的有效视频文件'
-      ) {
-        // Service-level errors are already toasted, only re-throw unexpected ones
-      }
+    } catch {
+      // 服务层已对校验/单文件失败做过具体 toast，这里仅兜底提示重试
+      toast.error('视频上传失败，请重试')
     } finally {
       setIsUploading(false)
     }
@@ -245,6 +234,7 @@ export function VideoUpload({
     if (!disabled && !isUploading && !isSorting) {
       // 从数组移除对应对象，缩略图随之移除
       onChange(value.filter((_, i) => i !== index))
+      toast.success('删除成功，请及时保存')
     }
   }
 

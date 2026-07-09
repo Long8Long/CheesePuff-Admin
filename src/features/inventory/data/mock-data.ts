@@ -1,3 +1,5 @@
+import type { InventoryItem } from '../models/inventory'
+
 // 库存概览卡片数据
 export const inventoryOverviewData = {
   totalProducts: 156,
@@ -36,7 +38,10 @@ export const statusColorMap: Record<
 }
 
 // 低库存预警数据
-export const lowStockData = [
+export const lowStockData: Omit<
+  InventoryItem,
+  'unitPrice' | 'totalValue'
+>[] = [
   {
     id: 'P001',
     name: '渴望猫粮 鸡肉成猫配方 5.4kg',
@@ -88,7 +93,7 @@ export const lowStockData = [
 ]
 
 // 库存明细数据
-export const inventoryData = [
+export const inventoryData: InventoryItem[] = [
   {
     id: 'P001',
     name: '渴望猫粮 鸡肉成猫配方 5.4kg',
