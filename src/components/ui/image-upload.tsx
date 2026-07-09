@@ -16,6 +16,7 @@ import {
   arrayMove,
 } from '@dnd-kit/sortable'
 import { Upload, X, Image as ImageIcon, Loader2, Maximize2 } from 'lucide-react'
+import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import {
   AlertDialog,
@@ -253,10 +254,11 @@ export function ImageUpload({
 
       if (newItems.length > 0) {
         onChange([...value, ...newItems])
+        toast.success('上传成功，请及时保存')
       }
     } catch (error) {
       console.error('Upload failed:', error)
-      alert('图片上传失败，请重试')
+      toast.error('图片上传失败，请重试')
     } finally {
       setIsUploading(false)
     }

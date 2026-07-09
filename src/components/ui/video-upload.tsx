@@ -16,6 +16,7 @@ import {
   arrayMove,
 } from '@dnd-kit/sortable'
 import { Upload, X, Video, Loader2, Play } from 'lucide-react'
+import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { MediaPreviewDialog } from '@/components/ui/media-preview-dialog'
 
@@ -195,16 +196,12 @@ export function VideoUpload({
           .map((r) => ({ url: r.url, thumbnail: r.thumbnailUrl ?? null }))
         if (newItems.length > 0) {
           onChange([...value, ...newItems])
+          toast.success('上传成功，请及时保存')
         }
       }
-    } catch (error) {
-      // Error handling is done in the service layer with specific messages
-      if (
-        error instanceof Error &&
-        error.message !== '没有可上传的有效视频文件'
-      ) {
-        // Service-level errors are already toasted, only re-throw unexpected ones
-      }
+    } catch {
+      // 服务层已对校验/单文件失败做过具体 toast，这里仅兜底提示重试
+      toast.error('视频上传失败，请重试')
     } finally {
       setIsUploading(false)
     }
