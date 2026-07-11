@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate } from '@tanstack/react-router'
-import { Loader2, LogIn } from 'lucide-react'
+import { Loader2, LogIn, Eye } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuthStore } from '@/stores/auth-store'
 import { cn } from '@/lib/utils'
@@ -125,6 +125,19 @@ export function UserAuthForm({
         <Button className='mt-2' disabled={isLoading}>
           {isLoading ? <Loader2 className='animate-spin' /> : <LogIn />}
           登录
+        </Button>
+        <Button
+          type='button'
+          variant='outline'
+          className='mt-2'
+          onClick={() => {
+            auth.enterGuestMode()
+            toast.success('已进入游客模式，数据为演示数据')
+            navigate({ to: '/cats', replace: true })
+          }}
+        >
+          <Eye />
+          游客登录
         </Button>
       </form>
     </Form>
