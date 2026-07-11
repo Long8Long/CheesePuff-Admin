@@ -29,12 +29,15 @@ export type Store = string
 /**
  * Media item / 媒体资源
  *
- * 原图/视频与其缩略图原子绑定，拖拽重排时缩略图随对象自动跟随，避免错位。
- * `thumbnail` 为图片缩略图 / 视频首帧；历史数据可能为 null，渲染时需降级用 url。
+ * `url` 为原图/视频地址；图片缩略图不再独立存储，改由 OSS 按场景实时生成
+ * （见 src/lib/image.ts 的 withImageProcess），分辨率可控、流量更省。
+ * `thumbnail` 仅用于视频首帧（OSS 图片处理无法从视频 URL 生成缩略图），
+ * 图片数据中应视为 undefined。
  */
 export interface MediaItem {
   url: string
-  thumbnail: string | null
+  /** 视频首帧；图片数据不使用此字段 */
+  thumbnail?: string | null
 }
 
 /**

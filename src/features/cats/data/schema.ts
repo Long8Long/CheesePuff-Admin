@@ -3,11 +3,12 @@ import type { Cat, CatCafeStatus, Store } from '../models'
 
 /**
  * Media item schema / 媒体资源 schema
- * url 为原图/视频地址，thumbnail 为缩略图/视频首帧（历史数据可能为 null）
+ * url 为原图/视频地址；图片缩略图由 OSS 按需生成，不再校验。
+ * thumbnail 可选，仅用于视频首帧。
  */
 export const mediaItemSchema = z.object({
   url: z.string(),
-  thumbnail: z.string().nullable(),
+  thumbnail: z.string().nullable().optional(),
 })
 
 /**

@@ -6,6 +6,7 @@ import { DataTableColumnHeader } from '@/components/data-table'
 import { statusColors } from '../data/data'
 import type { Cat } from '../models'
 import { DataTableRowActions } from './data-table-row-actions'
+import { ThumbnailCell } from './thumbnail-cell'
 
 // 计算年龄
 function calculateAge(birthday: string): string {
@@ -74,27 +75,7 @@ export const catsColumns: ColumnDef<Cat>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='照片' />
     ),
-    cell: ({ row }) => {
-      // 配对结构：取第一张图的缩略图，历史数据 thumbnail 为 null 时降级用原图
-      const firstImage = row.original.images?.[0]
-      const thumbnail = firstImage ? (firstImage.thumbnail ?? firstImage.url) : null
-      return (
-        <div className='size-12 overflow-hidden rounded-md bg-muted'>
-          {thumbnail ? (
-            <img
-              src={thumbnail}
-              alt={row.getValue('name')}
-              className='size-full object-cover'
-              loading='lazy'
-            />
-          ) : (
-            <div className='flex size-full items-center justify-center text-muted-foreground text-xs'>
-              无图
-            </div>
-          )}
-        </div>
-      )
-    },
+    cell: ({ row }) => <ThumbnailCell cat={row.original} />,
     enableSorting: false,
   },
   {

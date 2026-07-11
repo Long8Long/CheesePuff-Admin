@@ -60,11 +60,10 @@ function generateCat(id: number): Cat {
   const birthday = randomBirthday()
   const price = faker.number.int({ min: 500, max: 10000 })
 
-  // 生成 1-3 张图片（配对结构：原图绑定缩略图）
+  // 生成 1-3 张图片（只存原图 url，缩略图由 OSS 按需生成）
   const imageCount = faker.number.int({ min: 1, max: 3 })
   const images = Array.from({ length: imageCount }, (_, i) => ({
     url: generateCatImage(idStr, i),
-    thumbnail: generateCatImage(idStr, i),
   }))
 
   return {
