@@ -1,7 +1,13 @@
-import axios from 'axios'
+import axios, { getAdapter } from 'axios'
 import humps from 'humps'
 import { toast } from 'sonner'
 import { getCookie, removeCookie } from './cookies'
+import { mockAdapter } from './mock'
+
+// 真实请求 adapter（axios 默认：xhr / http / fetch 自动选择）
+// 注意：getAdapter(undefined) 在 axios 1.13 会抛 "Unknown adapter 'undefined'"，
+// 必须显式传入默认适配器列表。
+const realAdapter = getAdapter(['xhr', 'http', 'fetch'])
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || '',
@@ -9,6 +15,14 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
   timeout: 30000, // 30 seconds timeout
+  // 游客模式走 mock adapter，否则走真实 HTTP
+  // 用 cookie 判断以避免与 auth-store 产生循环依赖
+  adapter: (config) => {
+    if (getCookie('access_token') === 'guest') {
+      return mockAdapter(config)
+    }
+    return realAdapter(config)
+  },
 })
 
 // ============================================

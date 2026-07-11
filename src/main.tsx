@@ -52,10 +52,14 @@ const queryClient = new QueryClient({
   },
   queryCache: new QueryCache({
     onError: (error) => {
+      // 游客模式下不触发 401/500 跳转（mock 数据不会产生真实认证错误）
+      if (useAuthStore.getState().auth.isGuest) return
       if (error instanceof AxiosError) {
         if (error.response?.status === 401) {
           toast.error('Session expired!')
           useAuthStore.getState().auth.reset()
+          // 清空缓存，避免重新登录后看到上一个账号的数据
+          queryClient.clear()
           const redirect = `${router.history.location.href}`
           router.navigate({ to: '/sign-in', search: { redirect } })
         }

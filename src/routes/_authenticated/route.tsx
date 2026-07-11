@@ -13,6 +13,11 @@ export const Route = createFileRoute('/_authenticated')({
       })
     }
 
+    // 游客模式直接放行，跳过 getCurrentUser 真实请求
+    if (auth.isGuest) {
+      return
+    }
+
     // Initialize user info if not already loaded
     if (!auth.user) {
       try {
