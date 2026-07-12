@@ -18,6 +18,7 @@ import {
 import { Upload, X, Image as ImageIcon, Loader2, Maximize2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
+import { mediaSrc } from '@/lib/image'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,13 +31,12 @@ import {
 import { MediaPreviewDialog } from '@/components/ui/media-preview-dialog'
 
 /**
- * 配对媒体项：原图/视频与其缩略图原子绑定。
- * thumbnail 为缩略图（图片缩略图 / 视频首帧），历史数据可能为 null，渲染时降级用 url。
- * 本类型与 features/cats/models 的 MediaItem 结构一致，为保持共享 UI 与业务层解耦在此独立声明。
+ * 图片媒体项：只存原图 url，缩略图由 OSS 按需生成（见 src/lib/image.ts），
+ * 不再独立存储 thumbnail 字段。
+ * 本类型与 features/cats/models 的 MediaItem 结构兼容，为保持共享 UI 与业务层解耦在此独立声明。
  */
 export interface MediaItem {
   url: string
-  thumbnail: string | null
 }
 
 export interface UploadResult {
@@ -75,8 +75,8 @@ function SortableImageThumbnail({
     transition,
     isDragging,
   } = useSortable({ id: item.url })
-  // 历史数据兼容：thumbnail 可能为 null，降级用原图
-  const previewSrc = item.thumbnail ?? item.url
+  // 缩略图由 OSS 按需生成（原图 URL 拼处理参数）
+  const [errored, setErrored] = useState(false)
 
   const style: React.CSSProperties = {
     transform: transform
@@ -90,15 +90,21 @@ function SortableImageThumbnail({
     <div
       ref={setNodeRef}
       style={style}
-      className='group relative h-20 w-20 flex-shrink-0 cursor-grab overflow-hidden rounded-lg border active:cursor-grabbing'
+      className='group relative flex h-20 w-20 flex-shrink-0 cursor-grab items-center justify-center overflow-hidden rounded-lg border bg-muted active:cursor-grabbing'
       {...attributes}
       {...listeners}
     >
-      <img
-        src={previewSrc}
-        alt={`Thumbnail ${index + 1}`}
-        className='h-full w-full object-cover'
-      />
+      {errored ? (
+        <ImageIcon className='h-6 w-6 text-muted-foreground' />
+      ) : (
+        <img
+          key={item.url}
+          src={mediaSrc(item, 'thumb')}
+          alt={`Thumbnail ${index + 1}`}
+          className='h-full w-full object-cover'
+          onError={() => setErrored(true)}
+        />
+      )}
       {!disabled && (
         <>
           {/* 预览按钮：左上角，始终可见 */}
@@ -194,7 +200,7 @@ export function ImageUpload({
 
     // Create object URL for preview (in real app, this would be the URL returned from API)
     const url = URL.createObjectURL(file)
-    return { url, thumbnail: null }
+    return { url }
   }
 
   const validateFile = (file: File): boolean => {
@@ -240,11 +246,9 @@ export function ImageUpload({
       let newItems: MediaItem[] = []
 
       if (uploadFn) {
-        // 上传结果拼成 MediaItem：original_url → url，thumbnail_url → thumbnail
+        // 上传结果拼成 MediaItem：只取原图 url，缩略图由 OSS 按需生成
         const results = await uploadFn(filesToUpload)
-        newItems = results
-          .filter((r) => r.url)
-          .map((r) => ({ url: r.url, thumbnail: r.thumbnailUrl ?? null }))
+        newItems = results.filter((r) => r.url).map((r) => ({ url: r.url }))
       } else {
         // Fallback to simulated upload (still batch for consistency)
         newItems = await Promise.all(
@@ -392,9 +396,9 @@ export function ImageUpload({
             </SortableContext>
             <DragOverlay>
               {activeItem ? (
-                <div className='h-20 w-20 overflow-hidden rounded-lg border shadow-lg'>
+                <div className='flex h-20 w-20 items-center justify-center overflow-hidden rounded-lg border bg-muted shadow-lg'>
                   <img
-                    src={activeItem.thumbnail ?? activeItem.url}
+                    src={mediaSrc(activeItem, 'thumb')}
                     alt=''
                     className='h-full w-full object-cover'
                   />

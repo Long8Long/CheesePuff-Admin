@@ -22,12 +22,13 @@ import { MediaPreviewDialog } from '@/components/ui/media-preview-dialog'
 
 /**
  * 配对媒体项：视频与其缩略图（首帧）原子绑定。
- * thumbnail 为视频首帧，历史数据可能为 null，渲染时降级用占位图标。
- * 本类型与 features/cats/models 的 MediaItem 结构一致，为保持共享 UI 与业务层解耦在此独立声明。
+ * thumbnail 为视频首帧，历史数据可能为 null/缺失，渲染时降级用占位图标。
+ * 本类型与 features/cats/models 的 MediaItem 结构兼容，为保持共享 UI 与业务层解耦在此独立声明。
  */
 export interface MediaItem {
   url: string
-  thumbnail: string | null
+  /** 视频首帧；OSS 无法从视频 URL 生成缩略图，故视频仍需独立首帧 */
+  thumbnail?: string | null
 }
 
 export interface VideoUploadResult {

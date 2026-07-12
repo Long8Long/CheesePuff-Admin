@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react'
+import { Eye } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Separator } from '@/components/ui/separator'
 import { SidebarTrigger } from '@/components/ui/sidebar'
+import { Badge } from '@/components/ui/badge'
+import { useAuthStore } from '@/stores/auth-store'
 
 type HeaderProps = React.HTMLAttributes<HTMLElement> & {
   fixed?: boolean
@@ -10,6 +13,7 @@ type HeaderProps = React.HTMLAttributes<HTMLElement> & {
 
 export function Header({ className, fixed, children, ...props }: HeaderProps) {
   const [offset, setOffset] = useState(0)
+  const isGuest = useAuthStore((state) => state.auth.isGuest)
 
   useEffect(() => {
     const onScroll = () => {
@@ -43,6 +47,15 @@ export function Header({ className, fixed, children, ...props }: HeaderProps) {
       >
         <SidebarTrigger variant='outline' className='max-md:scale-125' />
         <Separator orientation='vertical' className='h-6' />
+        {isGuest && (
+          <Badge
+            variant='outline'
+            className='shrink-0 gap-1 border-amber-300 bg-amber-100/50 text-amber-900 dark:border-amber-700 dark:bg-amber-900/30 dark:text-amber-200'
+          >
+            <Eye className='h-3 w-3' />
+            游客模式 · 演示数据
+          </Badge>
+        )}
         {children}
       </div>
     </header>
